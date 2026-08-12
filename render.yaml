@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: loadcalcprox-site
+    runtime: static
+    buildCommand: echo "LoadCalcPro X static site ready"
+    staticPublishPath: .
+    autoDeployTrigger: commit

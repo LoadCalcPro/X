@@ -2,108 +2,395 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Electrical Load Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="description" content="LoadCalcPro X provides professional electrical calculation tools for load calculations, generator sizing workflows, and available fault current calculations.">
+  <title>LoadCalcPro X | Professional Electrical Calculation Tools</title>
   <style>
+    :root {
+      --navy: #0b1426;
+      --navy-2: #112240;
+      --panel: #162a49;
+      --border: #294362;
+      --text: #f5f7fb;
+      --muted: #b7c3d4;
+      --teal: #39c7bd;
+      --teal-dark: #1ca59c;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background: #0f172a;
-      color: white;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+
+    .shell {
+      width: min(1160px, calc(100% - 40px));
+      margin: 0 auto;
     }
 
     header {
-      padding: 60px 20px;
-      text-align: center;
-      background: linear-gradient(135deg, #1e3a8a, #0f172a);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(11, 20, 38, 0.96);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-
-    header h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
+    .nav {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
     }
-
-    header p {
-      font-size: 18px;
-      opacity: 0.85;
-    }
-
-    .btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 24px;
-      background: #22c55e;
-      color: black;
-      font-weight: bold;
+    .brand {
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
       text-decoration: none;
-      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .brand span { color: var(--teal); }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      font-size: 14px;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    .hero {
+      padding: 92px 0 72px;
+      background:
+        radial-gradient(circle at 78% 18%, rgba(57,199,189,0.14), transparent 28%),
+        linear-gradient(180deg, #0d1930 0%, var(--navy) 100%);
+    }
+    .eyebrow {
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 1.7px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    h1 {
+      max-width: 830px;
+      margin: 0;
+      font-size: clamp(42px, 7vw, 72px);
+      line-height: 1.03;
+      letter-spacing: -2px;
+    }
+    .hero p {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: 19px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 32px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 7px;
+      border: 1px solid var(--teal);
+      background: var(--teal);
+      color: #06191a;
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .btn:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+    .btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn.secondary:hover { border-color: var(--teal); }
+
+    section { padding: 76px 0; }
+    section.alt { background: #0e1a2e; }
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 42px);
+      letter-spacing: -0.8px;
+    }
+    .section-head p, .muted { color: var(--muted); }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .product {
+      display: flex;
+      flex-direction: column;
+      min-height: 420px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--navy-2);
+    }
+    .product h3 {
+      font-size: 23px;
+      margin: 0 0 8px;
+    }
+    .product p {
+      margin: 0 0 18px;
+      color: var(--muted);
+    }
+    .price {
+      font-size: 34px;
+      font-weight: 800;
+      margin: 8px 0 16px;
+    }
+    .price small {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 400;
+    }
+    .product ul {
+      margin: 0 0 24px;
+      padding-left: 19px;
+      color: #d9e1ec;
+    }
+    .product li { margin-bottom: 8px; }
+    .product .btn { margin-top: auto; }
+    .product.featured {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 1px rgba(57,199,189,0.15);
     }
 
-    section {
-      padding: 60px 20px;
-      max-width: 900px;
-      margin: auto;
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
     }
+    .feature {
+      padding: 24px;
+      border-top: 2px solid var(--teal);
+      background: #101f37;
+    }
+    .feature h3 { margin: 0 0 8px; }
+    .feature p { margin: 0; color: var(--muted); }
 
-    .card {
-      background: #1e293b;
-      padding: 20px;
-      margin: 15px 0;
+    .about {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 42px;
+      align-items: start;
+    }
+    .about-card {
+      padding: 26px;
+      background: var(--navy-2);
+      border: 1px solid var(--border);
       border-radius: 10px;
     }
+    .about-card strong { color: var(--teal); }
+
+    .contact-box {
+      display: flex;
+      justify-content: space-between;
+      gap: 28px;
+      align-items: center;
+      padding: 30px;
+      background: var(--navy-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .contact-box h2 { font-size: 30px; }
+    .contact-box p { margin: 6px 0 0; color: var(--muted); }
 
     footer {
-      text-align: center;
-      padding: 30px;
-      opacity: 0.6;
-      font-size: 14px;
+      padding: 34px 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .footer-links a { text-decoration: none; }
+    .footer-links a:hover { color: var(--white); }
+
+    @media (max-width: 850px) {
+      .products, .feature-grid, .about { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .hero { padding-top: 68px; }
+      .product { min-height: 0; }
+      .contact-box { align-items: flex-start; flex-direction: column; }
     }
   </style>
 </head>
-
 <body>
+  <header>
+    <div class="shell nav">
+      <a class="brand" href="#top">LoadCalcPro <span>X</span></a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#calculators">Calculators</a>
+        <a href="#why">Why LoadCalcPro X</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-<header>
-  <h1>Electrical Load Calculator</h1>
-  <p>Fast, accurate NEC-based load calculations for engineers and inspectors.</p>
+  <main id="top">
+    <section class="hero">
+      <div class="shell">
+        <div class="eyebrow">Professional electrical calculation tools</div>
+        <h1>Electrical calculations made clearer, faster, and easier to review.</h1>
+        <p>LoadCalcPro X provides practical calculation tools for electrical professionals, including an Optional Method Generator Calculator and an AIC Calculator for available fault current workflows.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#calculators">View calculators</a>
+          <a class="btn secondary" href="mailto:support@loadcalcprox.com">Contact support</a>
+        </div>
+      </div>
+    </section>
 
-  <!-- Replace this link later with your real calculator page -->
-  <a class="btn" href="optionalgenerator14.html">Launch Calculator</a>
-</header>
+    <section id="calculators">
+      <div class="shell">
+        <div class="section-head">
+          <div class="eyebrow">Membership options</div>
+          <h2>Choose the calculator access you need.</h2>
+          <p>Monthly memberships provide access to individual calculators or the complete Electrical Calculation Suite.</p>
+        </div>
 
-<section>
-  <h2>Why This Tool?</h2>
+        <div class="products">
+          <article class="product">
+            <h3>Optional Method Generator Calculator</h3>
+            <p>For dwelling optional-method load calculations and generator planning workflows.</p>
+            <div class="price">$9.99 <small>/ month</small></div>
+            <ul>
+              <li>Optional-method dwelling load workflow</li>
+              <li>Generator load and managed-load calculations</li>
+              <li>Responsive desktop and mobile experience</li>
+              <li>Professional print-ready results</li>
+            </ul>
+            <a class="btn" href="https://payhip.com/order?link=cCrlD&pricing_plan=18B15wvYBZ" rel="noopener">Choose Generator</a>
+          </article>
 
-  <div class="card">
-    ⚡ Built for real-world electrical engineering workflows
-  </div>
+          <article class="product">
+            <h3>AIC Calculator</h3>
+            <p>Available fault current calculations organized for practical field and plan-review use.</p>
+            <div class="price">$9.99 <small>/ month</small></div>
+            <ul>
+              <li>Available fault current calculation workflow</li>
+              <li>Clear, professional calculation inputs</li>
+              <li>Designed for electrical professionals</li>
+              <li>Membership-based access</li>
+            </ul>
+            <a class="btn" href="https://payhip.com/order?link=7oIsJ&pricing_plan=V6B73w4pBr" rel="noopener">Choose AIC</a>
+          </article>
 
-  <div class="card">
-    📐 Reduces manual calculation errors
-  </div>
+          <article class="product featured">
+            <h3>Electrical Calculation Suite</h3>
+            <p>One membership for both the Optional Method Generator Calculator and the AIC Calculator.</p>
+            <div class="price">$17.99 <small>/ month</small></div>
+            <ul>
+              <li>Generator calculator access</li>
+              <li>AIC calculator access</li>
+              <li>Lower combined monthly price</li>
+              <li>Single membership for both tools</li>
+            </ul>
+            <a class="btn" href="mailto:support@loadcalcprox.com?subject=Electrical%20Calculation%20Suite">Choose Suite</a>
+          </article>
+        </div>
+      </div>
+    </section>
 
-  <div class="card">
-    🧾 Standardized NEC-based structure
-  </div>
+    <section class="alt" id="why">
+      <div class="shell">
+        <div class="section-head">
+          <div class="eyebrow">Built for working professionals</div>
+          <h2>Focused tools without unnecessary clutter.</h2>
+          <p>LoadCalcPro X is designed to make common electrical calculation workflows easier to enter, understand, and review.</p>
+        </div>
+        <div class="feature-grid">
+          <div class="feature">
+            <h3>Clear workflow</h3>
+            <p>Inputs and results are organized so the calculation path is easy to follow.</p>
+          </div>
+          <div class="feature">
+            <h3>Professional output</h3>
+            <p>Results are presented in a format intended to be practical for projects, review, and documentation.</p>
+          </div>
+          <div class="feature">
+            <h3>Access anywhere</h3>
+            <p>The calculators are designed for modern desktop and mobile browsers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <div class="card">
-    🚀 Saves time on every project
-  </div>
-</section>
+    <section id="about">
+      <div class="shell about">
+        <div>
+          <div class="eyebrow">About LoadCalcPro X</div>
+          <h2>Electrical calculation software built around real-world use.</h2>
+          <p class="muted">LoadCalcPro X develops web-based tools for electrical load and fault-current calculations. The goal is straightforward: make the calculation process efficient while keeping the information clear enough to review and document.</p>
+          <p class="muted">LoadCalcPro X is an independent software product. Users remain responsible for applying the code requirements, design criteria, and professional judgment applicable to their project and jurisdiction.</p>
+        </div>
+        <div class="about-card">
+          <strong>Business website</strong>
+          <p>This site is the official public website for LoadCalcPro X products and customer support.</p>
+          <strong>Customer support</strong>
+          <p><a href="mailto:support@loadcalcprox.com">support@loadcalcprox.com</a></p>
+          <strong>Subscription billing</strong>
+          <p>Membership checkout and recurring billing are processed through Payhip and its connected payment processor.</p>
+        </div>
+      </div>
+    </section>
 
-<section>
-  <h2>Who It's For</h2>
+    <section class="alt" id="contact">
+      <div class="shell">
+        <div class="contact-box">
+          <div>
+            <h2>Questions about LoadCalcPro X?</h2>
+            <p>Contact us for product, membership, or access support.</p>
+          </div>
+          <a class="btn" href="mailto:support@loadcalcprox.com">support@loadcalcprox.com</a>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <div class="card">Electrical Engineers</div>
-  <div class="card">Plans Examiners</div>
-  <div class="card">Inspectors</div>
-  <div class="card">Contractors</div>
-</section>
-
-<footer>
-  © 2023 Electrical Load Calculator
-</footer>
-
+  <footer>
+    <div class="shell footer-row">
+      <div>© 2026 LoadCalcPro X. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="refund-policy.html">Refund Policy</a>
+        <a href="mailto:support@loadcalcprox.com">Support</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

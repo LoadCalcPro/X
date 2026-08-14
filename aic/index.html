@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>LoadCalcPro X | AIC Calculator</title>
+<style>
+html,body{width:100%;height:100%;margin:0;background:#f3f4f6;overflow:hidden}
+#aicFrame{display:block;width:100%;height:100%;border:0;background:#f3f4f6}
+</style>
+</head>
+<body>
+<iframe id="aicFrame" src="../aic_calculator.html" title="LoadCalcPro X AIC Calculator"></iframe>
+<script>
+(function(){
+  const frame=document.getElementById('aicFrame');
+  frame.addEventListener('load',function(){
+    try{
+      const w=frame.contentWindow;
+      const d=frame.contentDocument;
+      if(!d||d.getElementById('loadcalcproAicTemplateStyles')) return;
+
+      const style=d.createElement('style');
+      style.id='loadcalcproAicTemplateStyles';
+      style.textContent=`
+@media screen and (min-width:701px){
+  body{background:#f3f4f6!important}
+  .page{max-width:1100px!important;margin:0 auto 24px!important;padding:0 22px 22px!important}
+  .form-titlebar{
+    display:block!important;
+    margin:0 -22px 22px!important;
+    padding:16px 30px 18px!important;
+    background:#071b47!important;
+    color:#fff!important;
+    border:0!important;
+    box-shadow:0 10px 24px rgba(15,23,42,.18)!important;
+  }
+  .aic-template-top{
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:flex-start!important;
+    gap:28px!important;
+    min-width:0!important;
+  }
+  .form-brand{
+    flex:0 0 auto!important;
+    margin-top:2px!important;
+    color:#fff!important;
+    opacity:1!important;
+    font-size:25px!important;
+    line-height:1!important;
+    font-weight:900!important;
+    letter-spacing:-.02em!important;
+  }
+  .form-brand .bolt{color:#5eead4!important;margin-right:5px!important}
+  .form-brand .brand-x{color:#5eead4!important;margin-left:2px!important}
+  .aic-title-block{min-width:0!important}
+  .form-title{
+    margin:0!important;
+    color:#fff!important;
+    font-size:22px!important;
+    line-height:1.15!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+  }
+  .form-version{
+    margin-top:5px!important;
+    color:#dbeafe!important;
+    font-size:12px!important;
+    line-height:1.2!important;
+    font-weight:700!important;
+  }
+  .title-actions{
+    display:flex!important;
+    align-items:stretch!important;
+    justify-content:stretch!important;
+    gap:10px!important;
+    width:100%!important;
+    margin-top:16px!important;
+    flex-wrap:nowrap!important;
+  }
+  .title-actions>button,
+  .title-actions>.print-layout-control{
+    flex:1 1 0!important;
+    min-width:0!important;
+    min-height:44px!important;
+    margin:0!important;
+    border:1px solid rgba(255,255,255,.42)!important;
+    border-radius:9px!important;
+    background:rgba(255,255,255,.10)!important;
+    color:#fff!important;
+    box-shadow:none!important;
+    font-size:13px!important;
+    line-height:1.15!important;
+    font-weight:800!important;
+  }
+  .title-actions>button{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:10px 15px!important;
+    white-space:nowrap!important;
+  }
+  .title-actions>.print-layout-control{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:8px!important;
+    padding:6px 10px!important;
+  }
+  .title-actions>.print-layout-control select{
+    width:auto!important;
+    min-width:105px!important;
+    min-height:32px!important;
+    padding:4px 24px 4px 8px!important;
+    border:1px solid rgba(255,255,255,.48)!important;
+    border-radius:7px!important;
+    background:#fff!important;
+    color:#111827!important;
+    font-size:12px!important;
+  }
+  .title-actions>button[onclick*="preparePrint"]{
+    background:#0f766e!important;
+    border-color:#2dd4bf!important;
+  }
+  .title-actions>button.secondary,
+  .title-actions>.logout-button{
+    background:rgba(255,255,255,.10)!important;
+    color:#fff!important;
+  }
+  .title-actions>button:hover{background:rgba(255,255,255,.18)!important}
+  .title-actions>button[onclick*="preparePrint"]:hover{background:#115e59!important}
+}
+`;
+      d.head.appendChild(style);
+
+      const titlebar=d.querySelector('.form-titlebar');
+      const actions=titlebar&&titlebar.querySelector('.title-actions');
+      const originalTitle=titlebar&&titlebar.firstElementChild;
+      const brand=actions&&actions.querySelector('.form-brand');
+      if(titlebar&&actions&&originalTitle&&brand){
+        const top=d.createElement('div');
+        top.className='aic-template-top';
+        originalTitle.classList.add('aic-title-block');
+        top.appendChild(brand);
+        top.appendChild(originalTitle);
+        titlebar.insertBefore(top,actions);
+      }
+
+      const available=actions&&actions.querySelector('button[onclick*="member-dashboard"]');
+      if(available){
+        available.onclick=function(){window.top.location.href='../member-dashboard.html';};
+      }
+    }catch(e){
+      console.error('Unable to apply AIC template header',e);
+    }
+  });
+})();
+</script>
+</body>
+</html>

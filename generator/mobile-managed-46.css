@@ -98,16 +98,22 @@
     border-color:#2dd4bf!important;
   }
   .header-actions button.primary:hover{background:#115e59!important}
+
+  /* Match the desktop results bar to the calculator's actual 1180px outer width. */
   .bottom-results{
-    width:680px!important;
-    max-width:100%!important;
-    left:0!important;
-    right:0!important;
+    width:100%!important;
+    max-width:1180px!important;
+    left:auto!important;
+    right:auto!important;
     margin-left:auto!important;
     margin-right:auto!important;
     transform:none!important;
     box-sizing:border-box!important;
     background:#071b47!important;
+  }
+  .bottom-results-inner{
+    width:100%!important;
+    max-width:none!important;
   }
 }
 

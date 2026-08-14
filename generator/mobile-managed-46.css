@@ -39,15 +39,17 @@
   .app-brand{
     order:-1!important;
     flex:0 0 auto!important;
+    display:inline-flex!important;
+    align-items:center!important;
     padding:0!important;
     margin-top:2px!important;
     font-size:0!important;
     line-height:1!important;
     letter-spacing:-.02em!important;
   }
-  .app-brand::before{content:"LoadCalc";color:#fff;font-size:27px!important;font-weight:900!important}
-  .app-brand .bolt{margin-right:4px!important;font-size:27px!important;color:#fff!important}
-  .app-brand .brand-x{font-size:27px!important;color:#5eead4!important;font-weight:900!important}
+  .app-brand::before{content:"LoadCalc";order:1;color:#fff;font-size:27px!important;font-weight:900!important}
+  .app-brand .bolt{order:0;margin-right:4px!important;font-size:27px!important;color:#fff!important}
+  .app-brand .brand-x{order:2;font-size:27px!important;color:#5eead4!important;font-weight:900!important}
   .app-brand .brand-x::before{content:"Pro "}
   .brand-row>div:first-child{min-width:0!important}
   .app-title{

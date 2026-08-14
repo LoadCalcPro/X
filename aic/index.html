@@ -5,10 +5,58 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>LoadCalcPro X | AIC Calculator</title>
-<meta http-equiv="refresh" content="0;url=../aic_calculator.html">
-<script>window.location.replace('../aic_calculator.html');</script>
+<style>
+:root{--navy:#071b47;--teal:#0f766e;--teal2:#115e59;--page:#f3f4f6}*{box-sizing:border-box}html,body{width:100%;min-height:100%;margin:0;background:var(--page);font-family:Arial,Helvetica,sans-serif;color:#111827}body{overflow-x:hidden}.shell{min-height:100vh}.app-header{width:100%;max-width:1100px;margin:0 auto;padding:18px 24px 20px;background:var(--navy);color:#fff;box-shadow:0 10px 24px rgba(15,23,42,.18)}.header-top{display:flex;align-items:flex-start;gap:30px}.brand{display:inline-flex;align-items:center;flex:0 0 auto;margin-top:1px;font-size:0;line-height:1;font-weight:900;white-space:nowrap}.brand .bolt{order:0;margin-right:5px;color:#ff7a45;font-size:29px}.brand::before{content:"LoadCalc";order:1;color:#fff;font-size:29px;letter-spacing:-.025em}.brand .x{order:2;color:#5eead4;font-size:29px;letter-spacing:-.025em}.brand .x::before{content:"Pro "}.title-block{min-width:0}.title{margin:0;font-size:22px;line-height:1.15;font-weight:900;white-space:nowrap}.version{margin-top:6px;color:#dbeafe;font-size:12px;font-weight:700}.actions{display:grid;grid-template-columns:1fr 1fr 1.35fr 1fr 1fr;gap:10px;width:100%;margin-top:18px}.actions button,.print-control{min-width:0;min-height:46px;border:1px solid rgba(255,255,255,.40);border-radius:9px;background:rgba(255,255,255,.10);color:#fff;font-size:13px;font-weight:800}.actions button{display:flex;align-items:center;justify-content:center;padding:10px 14px;cursor:pointer}.actions button:hover{background:rgba(255,255,255,.18)}.actions .primary{background:var(--teal);border-color:#2dd4bf}.actions .primary:hover{background:var(--teal2)}.print-control{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 9px;white-space:nowrap}.print-control select{width:118px;min-height:32px;border:0;border-radius:7px;padding:5px 7px;background:#fff;color:#111827;font-size:12px;font-weight:700}.frame-wrap{width:100%;background:var(--page)}#aicFrame{display:block;width:100%;min-height:850px;border:0;background:var(--page)}.restore-overlay{position:fixed;inset:0;z-index:20000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.72)}.restore-overlay.show{display:flex}.restore-box{width:100%;max-width:430px;background:#fff;border-radius:16px;padding:21px;box-shadow:0 28px 80px rgba(15,23,42,.34)}.restore-brand{margin-bottom:8px;color:#244396;font-size:21px;font-weight:900}.restore-title{margin:0 0 8px;color:#374151;font-size:21px;line-height:1.25}.restore-text{margin:8px 0 15px;color:#4b5563;font-size:16px;line-height:1.45}.restore-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.restore-actions button{min-height:43px;border-radius:9px;font-size:15px;font-weight:800;cursor:pointer}.restore-new{background:#fff;color:#244396;border:1px solid #244396}.restore-continue{background:#244396;color:#fff;border:1px solid #244396}@media(max-width:760px){.app-header{padding:15px 14px 17px}.header-top{display:block}.brand .bolt,.brand::before,.brand .x{font-size:23px}.title{margin-top:10px;font-size:18px;white-space:normal}.actions{grid-template-columns:1fr 1fr}.print-control{grid-column:1/-1}.actions .primary{grid-column:auto}.restore-actions{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-<p>Opening AIC Calculator…</p>
+<div class="shell">
+<header class="app-header">
+  <div class="header-top">
+    <div class="brand"><span class="bolt">⚡</span><span class="x">X</span></div>
+    <div class="title-block"><div class="title">Available Fault Current (AIC)</div><div class="version">Version 1.0</div></div>
+  </div>
+  <div class="actions">
+    <button type="button" id="mainSiteBtn">Main Site</button>
+    <button type="button" id="calculatorsBtn">Calculators</button>
+    <label class="print-control" for="outerPrintLayout">Print Options
+      <select id="outerPrintLayout" aria-label="Print options">
+        <option value="1">1 per page</option><option value="2">2 per page</option><option value="4" selected>4 per page</option><option value="8">8 per page</option>
+      </select>
+    </label>
+    <button type="button" class="primary" id="printBtn">Print / PDF</button>
+    <button type="button" id="newCalculationBtn">New Calculation</button>
+  </div>
+</header>
+<div class="frame-wrap"><iframe id="aicFrame" src="../aic_calculator.html" title="LoadCalcPro X AIC Calculator"></iframe></div>
+</div>
+<div class="restore-overlay" id="outerRestore" role="dialog" aria-modal="true">
+  <div class="restore-box"><div class="restore-brand">LoadCalcPro X</div><h2 class="restore-title">A previous calculation was found.</h2><p class="restore-text">Would you like to continue your previous calculation or start a new one?</p><div class="restore-actions"><button type="button" class="restore-new" id="outerStartNew">Start New Calculation</button><button type="button" class="restore-continue" id="outerContinue">Continue Previous Calculation</button></div></div>
+</div>
+<script>
+(function(){
+  const frame=document.getElementById('aicFrame');
+  const layout=document.getElementById('outerPrintLayout');
+  const restore=document.getElementById('outerRestore');
+  let resizeObserver=null, mutationObserver=null;
+  function doc(){try{return frame.contentDocument||frame.contentWindow.document}catch(e){return null}}
+  function win(){try{return frame.contentWindow}catch(e){return null}}
+  function nativeButton(pattern){const d=doc();if(!d)return null;return Array.from(d.querySelectorAll('button')).find(b=>pattern.test((b.textContent||'').trim()))||null}
+  function hideNativeHeader(){const d=doc();if(!d)return;let s=d.getElementById('xUnifiedAicHeader');if(!s){s=d.createElement('style');s.id='xUnifiedAicHeader';d.head.appendChild(s)}s.textContent='@media screen{.form-titlebar{display:none!important}.page{margin-top:8px!important;margin-bottom:8px!important}.restore-modal{display:none!important}}'}
+  function resizeFrame(){const d=doc();if(!d)return;requestAnimationFrame(()=>{const b=d.body,h=d.documentElement;const height=Math.max(b?b.scrollHeight:0,b?b.offsetHeight:0,h?h.scrollHeight:0,h?h.offsetHeight:0);if(height)frame.style.height=(height+4)+'px'})}
+  function syncLayout(){const d=doc();if(!d)return;const inner=d.getElementById('printLayout');if(inner)layout.value=inner.value||'4'}
+  function hasSaved(){try{const raw=localStorage.getItem('loadCalcProAicCalculatorExpandablePanels');if(!raw)return false;const saved=JSON.parse(raw);return !!(saved&&saved.values&&Object.entries(saved.values).some(([k,v])=>k!=='utilityFault2'&&String(v||'').trim()!==''))}catch(e){return false}}
+  function clickNative(pattern){const b=nativeButton(pattern);if(b){b.click();return true}return false}
+  frame.addEventListener('load',function(){const d=doc();if(!d)return;hideNativeHeader();syncLayout();resizeFrame();setTimeout(resizeFrame,100);setTimeout(resizeFrame,500);if(window.ResizeObserver&&d.body){if(resizeObserver)resizeObserver.disconnect();resizeObserver=new ResizeObserver(resizeFrame);resizeObserver.observe(d.body)}if(window.MutationObserver&&d.body){if(mutationObserver)mutationObserver.disconnect();mutationObserver=new MutationObserver(()=>resizeFrame());mutationObserver.observe(d.body,{childList:true,subtree:true})}if(hasSaved())restore.classList.add('show')});
+  window.addEventListener('resize',resizeFrame);
+  document.getElementById('mainSiteBtn').addEventListener('click',()=>location.href='../index.html');
+  document.getElementById('calculatorsBtn').addEventListener('click',()=>location.href='../member-dashboard.html');
+  layout.addEventListener('change',function(){const d=doc();const inner=d&&d.getElementById('printLayout');if(inner){inner.value=layout.value;inner.dispatchEvent(new Event('change',{bubbles:true}))}});
+  document.getElementById('printBtn').addEventListener('click',function(){if(!clickNative(/print\s*\/\s*save\s*pdf/i)){const w=win();try{if(w&&typeof w.preparePrint==='function')w.preparePrint()}catch(e){}}});
+  document.getElementById('newCalculationBtn').addEventListener('click',function(){const d=doc();if(!d)return;const native=d.getElementById('startNewBtn');if(native){native.click();setTimeout(resizeFrame,50);return}const w=win();try{if(w&&typeof w.startNewCalculation==='function'){w.startNewCalculation();setTimeout(resizeFrame,50)}}catch(e){}});
+  document.getElementById('outerContinue').addEventListener('click',function(){const d=doc();const b=d&&d.getElementById('continuePreviousBtn');if(b)b.click();restore.classList.remove('show');setTimeout(resizeFrame,50)});
+  document.getElementById('outerStartNew').addEventListener('click',function(){const d=doc();const b=d&&d.getElementById('startNewBtn');if(b)b.click();restore.classList.remove('show');setTimeout(resizeFrame,50)});
+})();
+</script>
 </body>
 </html>

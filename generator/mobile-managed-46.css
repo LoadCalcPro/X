@@ -25,7 +25,7 @@
   .app-header{
     display:block!important;
     padding:16px 30px 18px!important;
-    background:linear-gradient(112deg,#1e3a8a 0%,#17385f 52%,#0f172a 100%)!important;
+    background:#1a3975!important;
     border-bottom:0!important;
     box-shadow:0 10px 24px rgba(15,23,42,.18)!important;
   }

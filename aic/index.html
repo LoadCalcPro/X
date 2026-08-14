@@ -16,17 +16,12 @@ html,body{width:100%;height:100%;margin:0;background:#f3f4f6;font-family:Arial,H
 .brand .bolt,.brand .x{color:#5eead4}.brand .bolt{margin-right:5px}.brand .x{margin-left:2px}
 .title-block{min-width:0}.title{margin:0;font-size:22px;line-height:1.15;font-weight:900;white-space:nowrap}.version{margin-top:5px;color:#dbeafe;font-size:12px;line-height:1.2;font-weight:700}
 .actions{display:flex;align-items:stretch;gap:10px;width:100%;margin-top:16px}
-.actions button,.print-control{flex:1 1 0;min-width:0;min-height:44px;border:1px solid rgba(255,255,255,.42);border-radius:9px;background:rgba(255,255,255,.10);color:#fff;font-size:13px;line-height:1.15;font-weight:800}
-.actions button{display:inline-flex;align-items:center;justify-content:center;padding:10px 15px;cursor:pointer;white-space:nowrap}
+.actions button{flex:1 1 0;min-width:0;min-height:44px;border:1px solid rgba(255,255,255,.42);border-radius:9px;background:rgba(255,255,255,.10);color:#fff;font-size:13px;line-height:1.15;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:10px 15px;cursor:pointer;white-space:nowrap}
 .actions button:hover{background:rgba(255,255,255,.18)}
 .actions .primary{background:var(--teal);border-color:#2dd4bf}.actions .primary:hover{background:var(--teal2)}
-.print-control{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 10px;white-space:nowrap}
-.print-control select{width:auto;min-width:105px;min-height:32px;padding:4px 24px 4px 8px;border:1px solid rgba(255,255,255,.48);border-radius:7px;background:#fff;color:#111827;font-size:12px}
 .frame-wrap{flex:1 1 auto;min-height:0;background:#f3f4f6}
 #aicFrame{display:block;width:100%;height:100%;border:0;background:#f3f4f6}
-@media(max-width:700px){
-  .app-header{padding:14px 14px 16px}.header-top{display:block}.brand{font-size:20px}.title{margin-top:8px;font-size:18px;white-space:normal}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button,.print-control{min-height:46px}.print-control{grid-column:1/-1}
-}
+@media(max-width:700px){.app-header{padding:14px 14px 16px}.header-top{display:block}.brand{font-size:20px}.title{margin-top:8px;font-size:18px;white-space:normal}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button{min-height:46px}}
 </style>
 </head>
 <body>
@@ -40,12 +35,10 @@ html,body{width:100%;height:100%;margin:0;background:#f3f4f6;font-family:Arial,H
       </div>
     </div>
     <div class="actions">
-      <button type="button" id="availableBtn">Available Calculators</button>
-      <label class="print-control" for="outerPrintLayout">Print Layout
-        <select id="outerPrintLayout" aria-label="Reports per printed page"><option value="1">1 per page</option><option value="2">2 per page</option><option value="4" selected>4 per page</option><option value="8">8 per page</option></select>
-      </label>
-      <button type="button" class="primary" id="printBtn">Print / Save PDF</button>
-      <button type="button" id="logoutBtn">Log Out</button>
+      <button type="button" id="mainSiteBtn">Main Site</button>
+      <button type="button" id="calculatorsBtn">Calculators</button>
+      <button type="button" class="primary" id="printBtn">Print / PDF</button>
+      <button type="button" id="newCalculationBtn">New Calculation</button>
     </div>
   </header>
   <div class="frame-wrap"><iframe id="aicFrame" src="../aic_calculator.html" title="LoadCalcPro X AIC Calculator"></iframe></div>
@@ -53,8 +46,6 @@ html,body{width:100%;height:100%;margin:0;background:#f3f4f6;font-family:Arial,H
 <script>
 (function(){
   const frame=document.getElementById('aicFrame');
-  const outerLayout=document.getElementById('outerPrintLayout');
-
   function frameDoc(){try{return frame.contentDocument||frame.contentWindow.document}catch(e){return null}}
   function frameWin(){try{return frame.contentWindow}catch(e){return null}}
 
@@ -69,25 +60,23 @@ html,body{width:100%;height:100%;margin:0;background:#f3f4f6;font-family:Arial,H
         style.textContent='@media screen{.form-titlebar{display:none!important}.page{margin-top:24px!important}}';
         d.head.appendChild(style);
       }
-      const innerLayout=d.getElementById('printLayout');
-      if(innerLayout){outerLayout.value=innerLayout.value||'4';}
     }catch(e){console.error('AIC frame setup failed',e)}
   });
 
-  document.getElementById('availableBtn').addEventListener('click',function(){location.href='../member-dashboard.html'});
-  outerLayout.addEventListener('change',function(){
-    const d=frameDoc();
-    const inner=d&&d.getElementById('printLayout');
-    if(inner){inner.value=outerLayout.value;inner.dispatchEvent(new Event('change',{bubbles:true}));}
-  });
+  document.getElementById('mainSiteBtn').addEventListener('click',function(){location.href='../index.html'});
+  document.getElementById('calculatorsBtn').addEventListener('click',function(){location.href='../member-dashboard.html'});
   document.getElementById('printBtn').addEventListener('click',function(){
     const w=frameWin();
     if(w&&typeof w.preparePrint==='function') w.preparePrint();
   });
-  document.getElementById('logoutBtn').addEventListener('click',function(){
+  document.getElementById('newCalculationBtn').addEventListener('click',function(){
     const d=frameDoc();
-    const inner=d&&d.getElementById('logoutBtn');
-    if(inner) inner.click();
+    if(!d) return;
+    const innerNew=d.getElementById('newCalculationBtn');
+    if(innerNew){innerNew.click();return;}
+    const candidates=Array.from(d.querySelectorAll('button'));
+    const button=candidates.find(function(b){return /new calculation/i.test((b.textContent||'').trim())});
+    if(button) button.click();
   });
 })();
 </script>

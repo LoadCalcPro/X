@@ -99,6 +99,12 @@
   }
   .header-actions button.primary:hover{background:#115e59!important}
   .bottom-results{
+    width:100%!important;
+    max-width:680px!important;
+    left:50%!important;
+    right:auto!important;
+    transform:translateX(-50%)!important;
+    box-sizing:border-box!important;
     background:#071b47!important;
   }
 }

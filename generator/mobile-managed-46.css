@@ -41,11 +41,14 @@
     flex:0 0 auto!important;
     padding:0!important;
     margin-top:2px!important;
-    font-size:25px!important;
+    font-size:0!important;
     line-height:1!important;
     letter-spacing:-.02em!important;
   }
-  .app-brand .bolt{margin-right:5px!important}
+  .app-brand::before{content:"LoadCalc";color:#fff;font-size:25px!important}
+  .app-brand .bolt{margin-right:5px!important;font-size:25px!important}
+  .app-brand .brand-x{font-size:25px!important;color:#5eead4!important}
+  .app-brand .brand-x::before{content:"Pro"}
   .brand-row>div:first-child{min-width:0!important}
   .app-title{
     margin:0!important;

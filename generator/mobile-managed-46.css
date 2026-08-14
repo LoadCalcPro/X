@@ -45,10 +45,10 @@
     line-height:1!important;
     letter-spacing:-.02em!important;
   }
-  .app-brand::before{content:"LoadCalc";color:#fff;font-size:25px!important}
-  .app-brand .bolt{margin-right:5px!important;font-size:25px!important}
-  .app-brand .brand-x{font-size:25px!important;color:#5eead4!important}
-  .app-brand .brand-x::before{content:"Pro"}
+  .app-brand::before{content:"LoadCalc";color:#fff;font-size:27px!important;font-weight:900!important}
+  .app-brand .bolt{margin-right:4px!important;font-size:27px!important;color:#fff!important}
+  .app-brand .brand-x{font-size:27px!important;color:#5eead4!important;font-weight:900!important}
+  .app-brand .brand-x::before{content:"Pro "}
   .brand-row>div:first-child{min-width:0!important}
   .app-title{
     margin:0!important;

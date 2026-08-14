@@ -62,6 +62,39 @@
     if(modal)modal.classList.remove('show');
     try{if(w&&typeof w.startNewCalculation==='function')w.startNewCalculation()}catch(e){}
   }
+  function startFreshAicWorkspace(){
+    const d=doc(),w=win();
+    if(!d||!w)return;
+
+    try{
+      const cards=()=>Array.from(d.querySelectorAll('#calculationsContainer > .card'));
+      while(cards().length>2){
+        const current=cards();
+        current[current.length-1].remove();
+      }
+
+      if(typeof w.resetCalculator==='function'){
+        w.resetCalculator(1);
+        w.resetCalculator(2);
+      }else{
+        d.querySelectorAll('#calculationsContainer input').forEach(node=>node.value='');
+        d.querySelectorAll('#calculationsContainer select').forEach(node=>node.value='');
+      }
+
+      if(typeof w.updatePanelControls==='function')w.updatePanelControls();
+      if(typeof w.removePrintPages==='function')w.removePrintPages();
+      if(typeof w.startNewCalculation==='function')w.startNewCalculation();
+      try{localStorage.removeItem(aicStorageKey)}catch(e){}
+      if(typeof w.updateAllSelectPlaceholders==='function')w.updateAllSelectPlaceholders();
+      if(typeof w.calculate==='function'){
+        w.calculate(1);
+        w.calculate(2);
+      }
+    }catch(e){}
+
+    reorderWireSizes();
+    setTimeout(resizeFrame,50);
+  }
   function positionRestoreModal(){
     const d=doc();if(!d)return;
     const modal=d.getElementById('restoreModal');if(!modal)return;
@@ -128,7 +161,7 @@
   document.getElementById('calculatorsBtn').addEventListener('click',()=>location.href='../member-dashboard.html');
   layout.addEventListener('change',function(){const d=doc(),inner=d&&d.getElementById('printLayout');if(inner){inner.value=layout.value;inner.dispatchEvent(new Event('change',{bubbles:true}))}});
   document.getElementById('printBtn').addEventListener('click',function(){const w=win();if(w&&typeof w.preparePrint==='function')w.preparePrint()});
-  document.getElementById('newCalculationBtn').addEventListener('click',function(){const w=win();if(w&&typeof w.startNewCalculation==='function'){w.startNewCalculation();setTimeout(resizeFrame,50)}});
+  document.getElementById('newCalculationBtn').addEventListener('click',startFreshAicWorkspace);
 })();
 </script>
 </body>

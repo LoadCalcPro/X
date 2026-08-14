@@ -43,8 +43,17 @@
     if(!d)return;
     let s=d.getElementById('xUnifiedAicHeader');
     if(!s){s=d.createElement('style');s.id='xUnifiedAicHeader';d.head.appendChild(s)}
-    s.textContent='@media screen{.form-titlebar,#accessGate{display:none!important}body.access-locked{overflow:auto!important}.page{margin-top:8px!important;margin-bottom:8px!important}}';
+    s.textContent='@media screen{.form-titlebar,#accessGate{display:none!important}body.access-locked{overflow:auto!important}.page{margin-top:8px!important;margin-bottom:8px!important}.restore-modal{position:fixed!important;inset:0!important;z-index:100!important;align-items:center!important;justify-content:center!important;padding:20px!important;background:rgba(15,23,42,.6)!important;backdrop-filter:none!important}.restore-dialog{width:100%!important;max-width:430px!important;overflow:visible!important;border:1px solid #d1d5db!important;border-radius:16px!important;padding:21px!important;background:#fff!important;box-shadow:0 24px 80px rgba(0,0,0,.32)!important}.restore-dialog-header{padding:0!important;border:0!important}.restore-dialog-kicker{display:none!important}.restore-dialog h2{margin:0 0 8px!important;color:#1e3a8a!important;font-size:21px!important;line-height:1.2!important}.restore-dialog-body{padding:0!important;color:#374151!important;font-size:16px!important;line-height:1.45!important}.restore-dialog-body p{margin:8px 0 15px!important}.restore-dialog-actions{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;padding:0!important}.restore-dialog-actions button{width:100%!important;min-height:43px!important;border:1px solid #1e3a8a!important;border-radius:9px!important;padding:9px 11px!important;background:#1e3a8a!important;color:#fff!important;font-size:13.3333px!important;font-weight:800!important}.restore-dialog-actions button.restore-secondary{background:#fff!important;color:#1e3a8a!important}@media(min-width:520px){.restore-dialog-actions{grid-template-columns:1fr 1fr!important}}}';
     if(d.body)d.body.classList.remove('access-locked');
+    const title=d.getElementById('restoreModalTitle');
+    if(title)title.textContent='LoadCalcPro';
+    const body=d.querySelector('.restore-dialog-body');
+    if(body)body.innerHTML='<p><strong>A previous calculation was found.</strong></p><p>Would you like to continue your previous calculation or start a new one?</p>';
+    const actions=d.querySelector('.restore-dialog-actions');
+    const start=d.getElementById('startNewBtn');
+    const cont=d.getElementById('continuePreviousBtn');
+    if(start){start.textContent='Start New Calculation';start.classList.add('restore-secondary')}
+    if(actions&&start&&cont){actions.appendChild(start);actions.appendChild(cont)}
     reorderWireSizes();
   }
   function reorderWireSizes(){

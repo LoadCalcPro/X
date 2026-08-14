@@ -97,3 +97,6 @@
     background:#071b47!important;
   }
 }
+
+/* Keep the working recovery prompt, but use the full LoadCalcPro X brand name. */
+#restoreTitle::after{content:" X";}

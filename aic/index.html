@@ -36,9 +36,11 @@
   const layout=document.getElementById('outerPrintLayout');
   const wireOrder=['8','6','4','3','2','1','1/0','2/0','3/0','4/0','250MCM','300MCM','350MCM','400MCM','500MCM','600MCM','750MCM','1000MCM'];
   const aicStorageKey='loadCalcProAicCalculatorExpandablePanels';
+  const maxVisiblePanels=8;
   let resizeObserver=null;
   function doc(){try{return frame.contentDocument||frame.contentWindow.document}catch(e){return null}}
   function win(){try{return frame.contentWindow}catch(e){return null}}
+  function cards(){const d=doc();return d?Array.from(d.querySelectorAll('#calculationsContainer > .card')):[]}
   function hasMeaningfulAicSavedData(){
     try{
       const raw=localStorage.getItem(aicStorageKey);
@@ -54,6 +56,26 @@
       });
     }catch(e){return false}
   }
+  function syncPanelCapacity(){
+    const d=doc();if(!d)return;
+    const count=cards().length;
+    const add=d.getElementById('addPanelBtn');
+    const remove=d.getElementById('removePanelBtn');
+    const note=d.getElementById('panelLimitNote');
+    if(add)add.disabled=count>=maxVisiblePanels;
+    if(remove)remove.disabled=count<=1;
+    const downstream=Math.max(0,count-1);
+    if(note){
+      note.textContent=count>=maxVisiblePanels
+        ?'Maximum of 7 downstream panels reached.'
+        :`There ${downstream===1?'is':'are'} ${downstream} downstream panel${downstream===1?'':'s'}. You may add ${maxVisiblePanels-count} more.`;
+    }
+  }
+  function removeToOnePanel(){
+    const current=cards();
+    while(current.length>1)current.pop().remove();
+    syncPanelCapacity();
+  }
   function clearStaleRestore(){
     if(hasMeaningfulAicSavedData())return;
     try{localStorage.removeItem(aicStorageKey)}catch(e){}
@@ -61,39 +83,48 @@
     const modal=d&&d.getElementById('restoreModal');
     if(modal)modal.classList.remove('show');
     try{if(w&&typeof w.startNewCalculation==='function')w.startNewCalculation()}catch(e){}
+    removeToOnePanel();
   }
   function startFreshAicWorkspace(){
     const d=doc(),w=win();
     if(!d||!w)return;
-
     try{
-      const cards=()=>Array.from(d.querySelectorAll('#calculationsContainer > .card'));
-      while(cards().length>2){
-        const current=cards();
-        current[current.length-1].remove();
-      }
-
-      if(typeof w.resetCalculator==='function'){
-        w.resetCalculator(1);
-        w.resetCalculator(2);
-      }else{
+      removeToOnePanel();
+      if(typeof w.resetCalculator==='function')w.resetCalculator(1);
+      else{
         d.querySelectorAll('#calculationsContainer input').forEach(node=>node.value='');
         d.querySelectorAll('#calculationsContainer select').forEach(node=>node.value='');
       }
-
-      if(typeof w.updatePanelControls==='function')w.updatePanelControls();
       if(typeof w.removePrintPages==='function')w.removePrintPages();
       if(typeof w.startNewCalculation==='function')w.startNewCalculation();
       try{localStorage.removeItem(aicStorageKey)}catch(e){}
       if(typeof w.updateAllSelectPlaceholders==='function')w.updateAllSelectPlaceholders();
-      if(typeof w.calculate==='function'){
-        w.calculate(1);
-        w.calculate(2);
-      }
+      if(typeof w.calculate==='function')w.calculate(1);
+      syncPanelCapacity();
     }catch(e){}
-
     reorderWireSizes();
     setTimeout(resizeFrame,50);
+  }
+  function addEighthPanel(event){
+    const d=doc(),w=win();if(!d||!w)return;
+    const count=cards().length;
+    if(count!==7)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    try{
+      if(typeof w.createPanel==='function')w.createPanel(8);
+      if(typeof w.updateAllSelectPlaceholders==='function')w.updateAllSelectPlaceholders();
+      if(typeof w.saveCurrentValues==='function')w.saveCurrentValues();
+    }catch(e){}
+    reorderWireSizes();syncPanelCapacity();setTimeout(resizeFrame,50);
+  }
+  function removeSecondPanel(event){
+    const d=doc(),w=win();if(!d||!w)return;
+    if(cards().length!==2)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const second=d.querySelector('[data-panel-index="2"]');
+    if(second)second.remove();
+    try{if(typeof w.saveCurrentValues==='function')w.saveCurrentValues()}catch(e){}
+    syncPanelCapacity();setTimeout(resizeFrame,50);
   }
   function positionRestoreModal(){
     const d=doc();if(!d)return;
@@ -122,8 +153,7 @@
     const cont=d.getElementById('continuePreviousBtn');
     if(start){start.textContent='Start New Calculation';start.classList.add('restore-secondary')}
     if(actions&&start&&cont){actions.appendChild(start);actions.appendChild(cont)}
-    reorderWireSizes();
-    positionRestoreModal();
+    reorderWireSizes();syncPanelCapacity();positionRestoreModal();
   }
   function reorderWireSizes(){
     const d=doc();if(!d)return;
@@ -153,7 +183,9 @@
     setTimeout(()=>{prepareInnerPage();resizeFrame()},150);
     setTimeout(()=>{prepareInnerPage();resizeFrame()},600);
     if(window.ResizeObserver&&d.body){if(resizeObserver)resizeObserver.disconnect();resizeObserver=new ResizeObserver(resizeFrame);resizeObserver.observe(d.body)}
-    d.addEventListener('click',function(){setTimeout(()=>{reorderWireSizes();resizeFrame()},50)},true);
+    const add=d.getElementById('addPanelBtn');if(add)add.addEventListener('click',addEighthPanel,true);
+    const remove=d.getElementById('removePanelBtn');if(remove)remove.addEventListener('click',removeSecondPanel,true);
+    d.addEventListener('click',function(){setTimeout(()=>{reorderWireSizes();syncPanelCapacity();resizeFrame()},50)},true);
   });
   window.addEventListener('resize',function(){resizeFrame();positionRestoreModal()});
   window.addEventListener('scroll',positionRestoreModal,{passive:true});

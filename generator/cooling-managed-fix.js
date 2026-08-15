@@ -71,155 +71,74 @@
 (function(){
   'use strict';
 
-  function numberFrom(id){
-    const el=document.getElementById(id);
-    if(!el)return 0;
-    const n=Number(String(el.textContent||'').replace(/[^0-9.-]/g,''));
-    return Number.isFinite(n)?n:0;
-  }
-  function inputNumber(id){
-    const el=document.getElementById(id);
-    const n=Number(el?el.value:0);
-    return Number.isFinite(n)?n:0;
-  }
+  function numberFrom(id){const el=document.getElementById(id);if(!el)return 0;const n=Number(String(el.textContent||'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0}
+  function inputNumber(id){const el=document.getElementById(id);const n=Number(el?el.value:0);return Number.isFinite(n)?n:0}
   function textNumber(value){return Math.round(Number(value)||0).toLocaleString('en-US')}
-  function generalAppliance(){
-    const general=(Math.max(inputNumber('q5'),0)*3)+(Math.max(Math.floor(inputNumber('q6')),0)*1500)+(Math.max(Math.floor(inputNumber('q7')),0)*1500);
-    let serviceAppliances=0;
-    let generatorAppliances=0;
-    for(let row=10;row<=30;row++){
-      serviceAppliances+=numberFrom('e'+row);
-      generatorAppliances+=numberFrom('f'+row);
-    }
-    return{service:general+serviceAppliances,generator:general+generatorAppliances};
-  }
+  function generalAppliance(){const general=(Math.max(inputNumber('q5'),0)*3)+(Math.max(Math.floor(inputNumber('q6')),0)*1500)+(Math.max(Math.floor(inputNumber('q7')),0)*1500);let serviceAppliances=0,generatorAppliances=0;for(let row=10;row<=30;row++){serviceAppliances+=numberFrom('e'+row);generatorAppliances+=numberFrom('f'+row)}return{service:general+serviceAppliances,generator:general+generatorAppliances}}
   function hvacContinuous(){return{service:numberFrom('e44')+numberFrom('e45'),generator:numberFrom('f44')+numberFrom('f45')}}
-
-  function makeInlineTotal(id,label,serviceId,generatorId){
-    const row=document.createElement('div');
-    row.id=id;
-    row.className='demand-row total checkpoint-total-row';
-    row.innerHTML='<span class="demand-description">'+label+'</span><span id="'+serviceId+'" class="demand-service"></span><span id="'+generatorId+'" class="demand-generator"></span>';
-    return row;
-  }
-
-  function ensureTotals(){
-    const demandBody=document.querySelector('#v3DemandCard .card-body');
-    if(demandBody&&!document.getElementById('generalApplianceTotalRow')){
-      const row=makeInlineTotal('generalApplianceTotalRow','Total General + Appliance Load','generalApplianceService','generalApplianceGenerator');
-      const first=demandBody.querySelector('.demand-row');
-      if(first)demandBody.insertBefore(row,first);else demandBody.appendChild(row);
-    }
-
-    const continuousBody=document.querySelector('.continuous-loads-card .card-body');
-    if(continuousBody&&!document.getElementById('hvacContinuousTotalRow')){
-      const row=makeInlineTotal('hvacContinuousTotalRow','Total HVAC + Continuous Load','hvacContinuousService','hvacContinuousGenerator');
-      continuousBody.appendChild(row);
-    }
-  }
-
-  function updateTotals(){
-    ensureTotals();
-    const ga=generalAppliance(),hc=hvacContinuous();
-    const values={generalApplianceService:ga.service,generalApplianceGenerator:ga.generator,hvacContinuousService:hc.service,hvacContinuousGenerator:hc.generator};
-    Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=textNumber(value)});
-  }
-
-  function bindContinuousManaged(){
-    [42,43,47].forEach(row=>{
-      const check=document.getElementById('m'+row),qty=document.getElementById('mq'+row);
-      if(check&&!check.dataset.continuousManagedBound){
-        check.dataset.continuousManagedBound='1';
-        if(row===47)check.addEventListener('click',()=>{if(typeof toggleManaged==='function')toggleManaged(row)});
-      }
-      if(qty&&!qty.dataset.continuousManagedBound){
-        qty.dataset.continuousManagedBound='1';
-        if(row===47)qty.addEventListener('click',event=>{event.stopPropagation();if(typeof reduceManagedQuantity==='function')reduceManagedQuantity(row)});
-      }
-    });
-  }
-
-  function printRow(label,service,generator,cls){
-    return '<tr class="'+cls+'"><td><strong>'+label+'</strong></td><td></td><td class="number"><strong>'+textNumber(service)+'</strong></td><td class="number"><strong>'+textNumber(generator)+'</strong></td></tr>';
-  }
+  function makeInlineTotal(id,label,serviceId,generatorId){const row=document.createElement('div');row.id=id;row.className='demand-row total checkpoint-total-row';row.innerHTML='<span class="demand-description">'+label+'</span><span id="'+serviceId+'" class="demand-service"></span><span id="'+generatorId+'" class="demand-generator"></span>';return row}
+  function ensureTotals(){const demandBody=document.querySelector('#v3DemandCard .card-body');if(demandBody&&!document.getElementById('generalApplianceTotalRow')){const row=makeInlineTotal('generalApplianceTotalRow','Total General + Appliance Load','generalApplianceService','generalApplianceGenerator');const first=demandBody.querySelector('.demand-row');if(first)demandBody.insertBefore(row,first);else demandBody.appendChild(row)}const continuousBody=document.querySelector('.continuous-loads-card .card-body');if(continuousBody&&!document.getElementById('hvacContinuousTotalRow'))continuousBody.appendChild(makeInlineTotal('hvacContinuousTotalRow','Total HVAC + Continuous Load','hvacContinuousService','hvacContinuousGenerator'))}
+  function updateTotals(){ensureTotals();const ga=generalAppliance(),hc=hvacContinuous();const values={generalApplianceService:ga.service,generalApplianceGenerator:ga.generator,hvacContinuousService:hc.service,hvacContinuousGenerator:hc.generator};Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=textNumber(value)})}
+  function bindContinuousManaged(){[42,43,47].forEach(row=>{const check=document.getElementById('m'+row),qty=document.getElementById('mq'+row);if(check&&!check.dataset.continuousManagedBound){check.dataset.continuousManagedBound='1';if(row===47)check.addEventListener('click',()=>{if(typeof toggleManaged==='function')toggleManaged(row)})}if(qty&&!qty.dataset.continuousManagedBound){qty.dataset.continuousManagedBound='1';if(row===47)qty.addEventListener('click',event=>{event.stopPropagation();if(typeof reduceManagedQuantity==='function')reduceManagedQuantity(row)})}})}
+  function printRow(label,service,generator,cls){return '<tr class="'+cls+'"><td><strong>'+label+'</strong></td><td></td><td class="number"><strong>'+textNumber(service)+'</strong></td><td class="number"><strong>'+textNumber(generator)+'</strong></td></tr>'}
 
   function polishPrint(){
-    const report=document.getElementById('printReport');
-    if(!report)return;
-    const page=report.querySelector('.print-page'),table=report.querySelector('.print-table');
-    if(!page||!table)return;
+    const report=document.getElementById('printReport');if(!report)return;
+    const page=report.querySelector('.print-page'),table=report.querySelector('.print-table');if(!page||!table)return;
+    const heading=page.querySelector('h1');if(heading)heading.innerHTML='<div class="generator-print-heading"><div class="print-brand"><span class="print-brand-main">LoadCalc</span><span class="print-brand-accent">Pro X</span></div><div class="print-title-text">Generator Optional Method Calculator</div></div>';
 
-    const heading=page.querySelector('h1');
-    if(heading)heading.innerHTML='<div class="generator-print-heading"><div class="print-brand"><span class="print-brand-main">LoadCalc</span><span class="print-brand-accent">Pro X</span></div><div class="print-title-text">Optional Method Generator Calculation Report</div></div>';
-
-    /* The compact table already contains the final VA and amp totals. Keep the details box for unique information only. */
+    /* Remove the separate footer/details box. Its only unique values are moved into the table. */
     const details=page.querySelector('.print-method-details');
+    let serviceVoltage='';
+    let managedLoads='';
     if(details){
       Array.from(details.children).forEach(function(item){
         const text=String(item.textContent||'').trim();
-        if(/^Service Total:/i.test(text)||/^Generator Total:/i.test(text))item.remove();
+        if(/^Service Voltage/i.test(text))serviceVoltage=text.replace(/^Service Voltage\s*/i,'').trim();
+        if(/^Managed Loads/i.test(text))managedLoads=text.replace(/^Managed Loads\s*/i,'').trim();
       });
+      details.remove();
     }
+    if(!serviceVoltage){const voltage=document.getElementById('serviceVoltage');serviceVoltage=voltage?String(voltage.value||'').trim():''}
+    if(!managedLoads){const managed=document.getElementById('bottomManagedLoadCount');managedLoads=managed?String(managed.textContent||'0').trim():'0'}
+    if(serviceVoltage&&!/V$/i.test(serviceVoltage))serviceVoltage+=' V';
 
-    table.querySelectorAll('.print-general-appliance-total,.print-hvac-continuous-total').forEach(r=>r.remove());
-    const ga=generalAppliance(),hc=hvacContinuous();
-    const tbody=table.querySelector('tbody');
-    const tfoot=table.querySelector('tfoot');
+    table.querySelectorAll('.print-general-appliance-total,.print-hvac-continuous-total,.print-report-info-row').forEach(r=>r.remove());
+    const ga=generalAppliance(),hc=hvacContinuous(),tbody=table.querySelector('tbody'),tfoot=table.querySelector('tfoot');
     if(tbody){
-      const firstHvac=Array.from(tbody.querySelectorAll('tr')).find(function(r){
-        const text=String(r.cells&&r.cells[0]?r.cells[0].textContent:'').trim();
-        return /Air Conditioning|Heating|Heat Pump|Central Electric Heat|Separately Controlled/i.test(text);
-      });
+      const demandSection=Array.from(tbody.querySelectorAll('tr')).find(r=>/^Demand Load$/i.test(String(r.textContent||'').trim()));
       const gaHtml=printRow('Total General + Appliance Load',ga.service,ga.generator,'print-general-appliance-total checkpoint-print-row');
-      if(firstHvac)firstHvac.insertAdjacentHTML('beforebegin',gaHtml);else tbody.insertAdjacentHTML('beforeend',gaHtml);
+      if(demandSection)demandSection.insertAdjacentHTML('beforebegin',gaHtml);else tbody.insertAdjacentHTML('beforeend',gaHtml);
     }
     if(tfoot){
-      const firstFooterRow=tfoot.querySelector('tr');
+      const finalTotal=tfoot.querySelector('.final-total-row');
       const hcHtml=printRow('Total HVAC + Continuous Load',hc.service,hc.generator,'print-hvac-continuous-total checkpoint-print-row');
-      if(firstFooterRow)firstFooterRow.insertAdjacentHTML('beforebegin',hcHtml);else tfoot.insertAdjacentHTML('afterbegin',hcHtml);
+      const infoHtml='<tr class="print-report-info-row"><td colspan="2"><strong>Service Voltage:</strong> '+serviceVoltage+'</td><td colspan="2"><strong>Managed Loads:</strong> '+managedLoads+'</td></tr>';
+      if(finalTotal){finalTotal.insertAdjacentHTML('beforebegin',hcHtml+infoHtml)}else tfoot.insertAdjacentHTML('beforeend',hcHtml+infoHtml);
     }
   }
 
   function installStyles(){
     if(document.getElementById('generatorFinalPolishStyles'))return;
-    const s=document.createElement('style');
-    s.id='generatorFinalPolishStyles';
-    s.textContent=`
+    const s=document.createElement('style');s.id='generatorFinalPolishStyles';s.textContent=`
 .checkpoint-total-row{font-weight:800!important;background:#fbfcfe!important;border-top:1px solid #94a3b8!important}
 @media(max-width:899px){#hvacContinuousTotalRow{display:grid!important;grid-template-columns:1fr auto auto!important;gap:10px!important;padding:9px 0!important}}
 @media print{
   .print-page{width:84%!important;margin:0 auto!important;border:.6pt solid #cbd5e1!important;padding:.14in!important;box-sizing:border-box!important}
-  .print-page h1,.print-project,.print-method-details,.print-table,.print-code-note{width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important}
+  .print-page h1,.print-project,.print-table,.print-code-note{width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important}
   .print-page h1{display:block!important;margin-top:0!important;margin-bottom:7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
-  .generator-print-heading{display:block!important}
-  .print-brand{display:block!important;margin:0 0 2px!important;font-size:12px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
-  .print-brand-main{color:#17377f!important}
-  .print-brand-accent{color:#0f766e!important;margin-left:2px!important}
-  .print-title-text{display:block!important;color:#111!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
-  .print-method-details{grid-template-columns:1fr 1fr!important}
-  .print-table{table-layout:fixed!important}
-  .print-table th:first-child,.print-table td:first-child{width:46%!important}
-  .print-table th:nth-child(2),.print-table td:nth-child(2){width:12%!important}
-  .print-table th:nth-child(3),.print-table td:nth-child(3),.print-table th:nth-child(4),.print-table td:nth-child(4){width:21%!important}
-  .checkpoint-print-row td{background:#fbfcfe!important;border-top:1px solid #94a3b8!important;font-weight:800!important}
-}`;
-    document.head.appendChild(s);
+  .generator-print-heading{display:block!important}.print-brand{display:block!important;margin:0 0 2px!important;font-size:12px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
+  .print-brand-main{color:#17377f!important}.print-brand-accent{color:#0f766e!important;margin-left:2px!important}.print-title-text{display:block!important;color:#111!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
+  .print-method-details{display:none!important}.print-table{table-layout:fixed!important}
+  .print-table th:first-child,.print-table td:first-child{width:46%!important}.print-table th:nth-child(2),.print-table td:nth-child(2){width:12%!important}.print-table th:nth-child(3),.print-table td:nth-child(3),.print-table th:nth-child(4),.print-table td:nth-child(4){width:21%!important}
+  .checkpoint-print-row td{background:#f7f7f7!important;color:#222!important;border-top:1px solid #94a3b8!important;font-weight:800!important}
+  .print-report-info-row td{background:#fff!important;color:#222!important;font-weight:400!important;border-top:1px solid #cfd4da!important;border-bottom:1px solid #cfd4da!important;text-align:left!important}
+  .print-report-info-row td:last-child{text-align:left!important}
+}`;document.head.appendChild(s)
   }
 
-  installStyles();
-  const originalCalculate=window.calculate;
-  if(typeof originalCalculate==='function'&&!window.__generatorFinalPolishWrapped){
-    window.calculate=function(){const result=originalCalculate.apply(this,arguments);updateTotals();return result};
-    window.__generatorFinalPolishWrapped=true;
-  }
-
-  window.printCalculation=function(){
-    if(typeof window.calculate==='function')window.calculate();
-    updateTotals();
-    polishPrint();
-    window.print();
-  };
-
+  installStyles();const originalCalculate=window.calculate;if(typeof originalCalculate==='function'&&!window.__generatorFinalPolishWrapped){window.calculate=function(){const result=originalCalculate.apply(this,arguments);updateTotals();return result};window.__generatorFinalPolishWrapped=true}
+  window.printCalculation=function(){if(typeof window.calculate==='function')window.calculate();updateTotals();polishPrint();window.print()};
   function init(){bindContinuousManaged();ensureTotals();updateTotals();setTimeout(()=>{bindContinuousManaged();updateTotals()},100)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

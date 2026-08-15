@@ -1,0 +1,87 @@
+(function(){
+  'use strict';
+  const frame=document.getElementById('aicFrame');
+  if(!frame)return;
+  const MOTOR_STORAGE_KEY='loadCalcProAicMotorContributionV1';
+
+  function d(){try{return frame.contentDocument||frame.contentWindow.document}catch(e){return null}}
+  function w(){try{return frame.contentWindow}catch(e){return null}}
+  function suffix(n){return n===1?'':String(n)}
+  function node(base,n){const doc=d();return doc?doc.getElementById(base+suffix(n)):null}
+  function num(v){const x=Number(String(v??'').replace(/,/g,'').trim());return Number.isFinite(x)?x:null}
+  function val(base,n){const el=node(base,n);return el?num(el.value):null}
+  function fmt(v,digits=0){return Number.isFinite(v)?v.toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—'}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function panelName(n){const doc=d();const el=n===1?doc?.getElementById('calculationName1'):node('calculationHeading',n);return String(el?.value||'').trim()||(n===1?'Main Service':`Downstream Panel ${n-1}`)}
+  function phaseFactor(n){return val('phase',n)===2?2:1.732}
+  function phaseLabel(n){const p=val('phase',n);return p===2?'Single Phase':p===1.732?'Three Phase':'—'}
+  function selectedText(base,n){const el=node(base,n);if(!el)return '—';const opt=el.options&&el.selectedIndex>=0?el.options[el.selectedIndex]:null;return String(opt?.textContent||el.value||'—')}
+  function conduitText(n){const s=selectedText('conduit',n);return s==='PVC'?'Non-metallic':s==='Steel'?'Metallic':s}
+  function motorState(n){try{const all=JSON.parse(localStorage.getItem(MOTOR_STORAGE_KEY)||'{}')||{};return all[String(n)]||null}catch(e){return null}}
+  function motorRows(n){
+    const doc=d();const card=doc?.querySelector(`[data-panel-index="${n}"]`)||doc?.querySelector(`[data-calc="${n}"]`);if(!card)return [];
+    return Array.from(card.querySelectorAll('.motor-row')).map(r=>{
+      const phase=r.querySelector('[data-motor-field="phase"]')?.value||'';
+      const voltage=r.querySelector('[data-motor-field="voltage"]')?.value||'';
+      const hp=r.querySelector('[data-motor-field="hp"]')?.value||'';
+      const qty=num(r.querySelector('[data-motor-field="quantity"]')?.value)||0;
+      const factorSel=r.querySelector('[data-motor-field="factor"]')?.value||'';
+      const factor=factorSel==='custom'?num(r.querySelector('[data-motor-field="customFactor"]')?.value):num(factorSel);
+      const flc=num(r.querySelector('[data-motor-readout="flc"]')?.textContent);
+      const contribution=num(r.querySelector('[data-motor-readout="contribution"]')?.textContent);
+      return {phase,voltage,hp,qty,factor,flc,contribution};
+    }).filter(r=>Number.isFinite(r.contribution)&&r.contribution>0);
+  }
+  function calc(n){
+    const L=val('distance',n),I=val('utilityFault',n),E=val('volts',n),N=val('conductors',n),p=val('phase',n);
+    const C=num(node('cConstant',n)?.textContent);
+    const valid=[L,I,E,N,p,C].every(Number.isFinite)&&E>0&&N>0&&p>0&&C>0;
+    if(!valid)return {valid:false};
+    const f=(p*L*I)/(N*C*E),M=1/(1+f),Isc=I*M;
+    const motors=motorRows(n),motorTotal=motors.reduce((s,r)=>s+r.contribution,0),total=Isc+motorTotal;
+    return {valid:true,L,I,E,N,p,C,f,M,Isc,motors,motorTotal,total};
+  }
+  function pair(formula,sub,result,final=false){return `<div class="eng-work-item${final?' eng-final':''}"><div class="eng-formula">${formula}</div><div class="eng-sub">${sub}</div><div class="eng-result">${result}</div></div>`}
+  function screenWork(n){
+    const c=calc(n);if(!c.valid)return '';
+    const pf=c.p===2?'2':'1.732';
+    let html='<div class="eng-work"><div class="eng-work-head"><span>Formula / Calculation</span><span>Calculated Value</span></div>';
+    html+=pair(`f = (${pf} × L × I) ÷ (N × C × V)`,`(${pf} × ${fmt(c.L)} × ${fmt(c.I)}) ÷ (${fmt(c.N)} × ${fmt(c.C)} × ${fmt(c.E)})`,c.f.toFixed(4));
+    html+=pair('M = 1 ÷ (1 + f)',`1 ÷ (1 + ${c.f.toFixed(4)})`,c.M.toFixed(4));
+    html+=pair('Isc = I × M',`${fmt(c.I)} × ${c.M.toFixed(4)}`,`${fmt(c.Isc)} A`,c.motorTotal===0);
+    if(c.motors.length){
+      html+='<div class="eng-motor-title">Motor Contribution</div>';
+      c.motors.forEach((m,i)=>{html+=pair('Imotor = FLC × Quantity × Factor',`${fmt(m.flc,1)} × ${fmt(m.qty)} × ${fmt(m.factor,1)}`,`${fmt(m.contribution)} A`)});
+      html+=pair('Isc,total = Isc + Motor Contribution',`${fmt(c.Isc)} + ${fmt(c.motorTotal)}`,`${fmt(c.total)} A`,true);
+    }
+    html+='</div>';return html;
+  }
+  function applyScreen(n){const details=node('calcDetails',n);if(!details)return;const html=screenWork(n);if(html)details.innerHTML=html}
+  function installStyles(){const doc=d();if(!doc||doc.getElementById('aicEngineeringWorkStyles'))return;const s=doc.createElement('style');s.id='aicEngineeringWorkStyles';s.textContent=`
+@media screen{
+  .formula-report{display:none!important}.motor-calc-summary{display:none!important}
+  .motor-contribution-panel{background:#fff!important}
+  .eng-work{margin-top:12px;border-top:1px solid #d7e0e8;border-bottom:1px solid #d7e0e8;padding:8px 0;font-family:Consolas,Monaco,monospace;color:#334155}
+  .eng-work-head{display:grid;grid-template-columns:minmax(0,1fr) 115px;gap:14px;padding:0 0 7px;margin-bottom:3px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;color:#17365d}
+  .eng-work-head span:last-child{text-align:right}
+  .eng-work-item{display:grid;grid-template-columns:minmax(0,1fr) 115px;grid-template-rows:auto auto;column-gap:14px;padding:5px 0;border-top:1px solid #edf1f5}
+  .eng-work-item:first-of-type{border-top:0}.eng-formula{grid-column:1;grid-row:1;font-size:14px;line-height:1.4}.eng-sub{grid-column:1;grid-row:2;font-size:14px;line-height:1.45;color:#475569}.eng-result{grid-column:2;grid-row:2;text-align:right;align-self:baseline;font-size:14px;font-weight:800;color:#0f3557;font-variant-numeric:tabular-nums}.eng-final .eng-result{font-weight:900}
+  .eng-motor-title{margin-top:8px;padding-top:8px;border-top:1px solid #cbd5e1;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;color:#17365d}
+  @media(max-width:560px){.eng-work-head,.eng-work-item{grid-template-columns:minmax(0,1fr) 88px;column-gap:8px}.eng-formula,.eng-sub,.eng-result{font-size:12px}}
+}
+@media print{
+  .print-page{color:#111!important}.print-page-header{border-bottom:1px solid #777!important;padding:0 0 .05in!important}.print-page-brand{font-size:9px!important;color:#333!important;font-weight:700!important}.print-page-brand .brand-x{color:#333!important}.print-page-title{font-size:9px!important;font-weight:700!important;color:#111!important;margin-top:1px!important}
+  .print-report-card{border:1px solid #777!important;border-radius:0!important;background:#fff!important;box-shadow:none!important}.print-report-panel{color:#111!important;border-bottom:1px solid #999!important}.print-report-section h3{color:#111!important}.print-report-section + .print-report-section{border-top:1px solid #bbb!important}
+  .print-page[data-layout="1"] .print-page-grid{justify-items:center}.print-page[data-layout="1"] .print-report-card{width:100%!important;max-width:6.45in!important}
+  .print-eng-head,.print-eng-item{display:grid;grid-template-columns:minmax(0,1fr) minmax(62px,24%);column-gap:8px}.print-eng-head{font-weight:700;border-bottom:1px solid #aaa;padding-bottom:2px;margin-bottom:2px}.print-eng-head span:last-child{text-align:right}.print-eng-item{grid-template-rows:auto auto;padding:2px 0}.print-eng-formula{grid-column:1;grid-row:1}.print-eng-sub{grid-column:1;grid-row:2}.print-eng-result{grid-column:2;grid-row:2;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}.print-eng-motor{margin-top:4px;padding-top:3px;border-top:1px solid #aaa;font-weight:700}
+  .print-page[data-layout="1"] .print-eng-head,.print-page[data-layout="1"] .print-eng-item{font-size:10px;line-height:1.45}.print-page[data-layout="2"] .print-eng-head,.print-page[data-layout="2"] .print-eng-item{font-size:8.3px;line-height:1.3}.print-page[data-layout="4"] .print-eng-head,.print-page[data-layout="4"] .print-eng-item{font-size:6.8px;line-height:1.22}.print-page[data-layout="8"] .print-eng-head,.print-page[data-layout="8"] .print-eng-item{font-size:5.4px;line-height:1.12}
+}
+`;doc.head.appendChild(s)}
+  function printPair(formula,sub,result){return `<div class="print-eng-item"><span class="print-eng-formula">${formula}</span><span class="print-eng-sub">${sub}</span><span class="print-eng-result">${result}</span></div>`}
+  function buildPrint(){const doc=d();if(!doc)return;doc.querySelectorAll('#calculationsContainer > .card').forEach((card,index)=>{const n=index+1;let report=card.querySelector('.clean-print-report');if(!report){report=doc.createElement('div');report.className='clean-print-report';card.appendChild(report)}const c=calc(n);const pf=c.valid?(c.p===2?'2':'1.732'):'—';let html=`<div class="print-report-panel">${esc(panelName(n))}</div><section class="print-report-section"><h3>Input Summary</h3><div class="print-report-row"><span class="print-report-label">Fault Current</span><span class="print-report-value">${c.valid?fmt(c.I)+' A':'—'}</span></div><div class="print-report-row"><span class="print-report-label">Distance</span><span class="print-report-value">${c.valid?fmt(c.L)+' ft':'—'}</span></div><div class="print-report-row"><span class="print-report-label">Conduit</span><span class="print-report-value">${esc(conduitText(n))}</span></div><div class="print-report-row"><span class="print-report-label">Wire</span><span class="print-report-value">${esc(selectedText('wireType',n))} ${esc(selectedText('wireSize',n))}</span></div><div class="print-report-row"><span class="print-report-label">Conductors / Phase</span><span class="print-report-value">${c.valid?fmt(c.N):'—'}</span></div><div class="print-report-row"><span class="print-report-label">Voltage / Phase</span><span class="print-report-value">${c.valid?fmt(c.E)+' V · '+phaseLabel(n):'—'}</span></div></section>`;if(c.valid){html+=`<section class="print-report-section"><h3>Calculation</h3><div class="print-eng-head"><span>Formula / Calculation</span><span>Value</span></div>`;html+=printPair(`f = (${pf} × L × I) ÷ (N × C × V)`,`(${pf} × ${fmt(c.L)} × ${fmt(c.I)}) ÷ (${fmt(c.N)} × ${fmt(c.C)} × ${fmt(c.E)})`,c.f.toFixed(4));html+=printPair('M = 1 ÷ (1 + f)',`1 ÷ (1 + ${c.f.toFixed(4)})`,c.M.toFixed(4));html+=printPair('Isc = I × M',`${fmt(c.I)} × ${c.M.toFixed(4)}`,`${fmt(c.Isc)} A`);if(c.motors.length){html+='<div class="print-eng-motor">Motor Contribution</div>';c.motors.forEach(m=>{html+=printPair('Imotor = FLC × Qty × Factor',`${fmt(m.flc,1)} × ${fmt(m.qty)} × ${fmt(m.factor,1)}`,`${fmt(m.contribution)} A`)});html+=printPair('Isc,total = Isc + Motor',`${fmt(c.Isc)} + ${fmt(c.motorTotal)}`,`${fmt(c.total)} A`)}html+='</section>'}report.innerHTML=html})}
+  function installPrintWrapper(){const win=w();if(!win||win.__aicPrintWorkWrapped)return;if(typeof win.buildCleanPrintReports==='function'){win.buildCleanPrintReports=buildPrint}if(typeof win.createPrintPages==='function'){const orig=win.createPrintPages;win.createPrintPages=function(layout){const count=orig.call(win,layout);const doc=d();doc?.querySelectorAll('.print-page-brand').forEach(el=>el.innerHTML='LoadCalcPro X');return count}}win.__aicPrintWorkWrapped=true}
+  function installCalcWrapper(){const win=w(),doc=d();if(!win||!doc||win.__aicEngineeringWrapped||typeof win.calculate!=='function')return;const orig=win.calculate;let busy=false;win.calculate=function(n){if(busy)return orig.call(win,n);busy=true;try{const out=orig.call(win,n);applyScreen(n);return out}finally{busy=false}};win.__aicEngineeringWrapped=true}
+  function install(){const doc=d(),win=w();if(!doc||!win)return;installStyles();installCalcWrapper();installPrintWrapper();try{doc.querySelectorAll('#calculationsContainer > .card').forEach((card,i)=>{const n=i+1;if(typeof win.calculate==='function')win.calculate(n);else applyScreen(n)})}catch(e){}}
+  frame.addEventListener('load',()=>{install();setTimeout(install,100);setTimeout(install,500)});
+  try{if(d()?.readyState==='complete')install()}catch(e){}
+})();

@@ -65,137 +65,23 @@
     if(add)add.disabled=count>=maxVisiblePanels;
     if(remove)remove.disabled=count<=1;
     const downstream=Math.max(0,count-1);
-    if(note){
-      note.textContent=count>=maxVisiblePanels
-        ?'Maximum of 7 downstream panels reached.'
-        :`There ${downstream===1?'is':'are'} ${downstream} downstream panel${downstream===1?'':'s'}. You may add ${maxVisiblePanels-count} more.`;
-    }
+    if(note){note.textContent=count>=maxVisiblePanels?'Maximum of 7 downstream panels reached.':`There ${downstream===1?'is':'are'} ${downstream} downstream panel${downstream===1?'':'s'}. You may add ${maxVisiblePanels-count} more.`;}
   }
-  function removeToOnePanel(){
-    const current=cards();
-    while(current.length>1)current.pop().remove();
-    syncPanelCapacity();
-  }
-  function clearStaleRestore(){
-    if(hasMeaningfulAicSavedData())return;
-    try{localStorage.removeItem(aicStorageKey)}catch(e){}
-    const d=doc(),w=win();
-    const modal=d&&d.getElementById('restoreModal');
-    if(modal)modal.classList.remove('show');
-    try{if(w&&typeof w.startNewCalculation==='function')w.startNewCalculation()}catch(e){}
-    removeToOnePanel();
-  }
-  function startFreshAicWorkspace(){
-    const d=doc(),w=win();
-    if(!d||!w)return;
-    try{
-      removeToOnePanel();
-      if(typeof w.resetCalculator==='function')w.resetCalculator(1);
-      else{
-        d.querySelectorAll('#calculationsContainer input').forEach(node=>node.value='');
-        d.querySelectorAll('#calculationsContainer select').forEach(node=>node.value='');
-      }
-      if(typeof w.removePrintPages==='function')w.removePrintPages();
-      if(typeof w.startNewCalculation==='function')w.startNewCalculation();
-      try{localStorage.removeItem(aicStorageKey)}catch(e){}
-      if(typeof w.updateAllSelectPlaceholders==='function')w.updateAllSelectPlaceholders();
-      if(typeof w.calculate==='function')w.calculate(1);
-      syncPanelCapacity();
-    }catch(e){}
-    reorderWireSizes();
-    setTimeout(resizeFrame,50);
-  }
-  function addEighthPanel(event){
-    const d=doc(),w=win();if(!d||!w)return;
-    const count=cards().length;
-    if(count!==7)return;
-    event.preventDefault();event.stopImmediatePropagation();
-    try{
-      if(typeof w.createPanel==='function')w.createPanel(8);
-      if(typeof w.updateAllSelectPlaceholders==='function')w.updateAllSelectPlaceholders();
-      if(typeof w.saveCurrentValues==='function')w.saveCurrentValues();
-    }catch(e){}
-    reorderWireSizes();syncPanelCapacity();setTimeout(resizeFrame,50);
-  }
-  function removeSecondPanel(event){
-    const d=doc(),w=win();if(!d||!w)return;
-    if(cards().length!==2)return;
-    event.preventDefault();event.stopImmediatePropagation();
-    const second=d.querySelector('[data-panel-index="2"]');
-    if(second)second.remove();
-    try{if(w&&typeof w.saveCurrentValues==='function')w.saveCurrentValues()}catch(e){}
-    syncPanelCapacity();setTimeout(resizeFrame,50);
-  }
-  function positionRestoreModal(){
-    const d=doc();if(!d)return;
-    const modal=d.getElementById('restoreModal');if(!modal)return;
-    const rect=frame.getBoundingClientRect();
-    const visibleTop=Math.max(0,-rect.top);
-    const visibleBottom=Math.min(frame.offsetHeight,window.innerHeight-rect.top);
-    const visibleHeight=Math.max(0,visibleBottom-visibleTop);
-    modal.style.top=visibleTop+'px';
-    modal.style.height=(visibleHeight||window.innerHeight)+'px';
-  }
-  function prepareInnerPage(){
-    const d=doc();
-    if(!d)return;
-    clearStaleRestore();
-    let s=d.getElementById('xUnifiedAicHeader');
-    if(!s){s=d.createElement('style');s.id='xUnifiedAicHeader';d.head.appendChild(s)}
-    s.textContent='@media screen{.form-titlebar,#accessGate{display:none!important}body.access-locked{overflow:auto!important}.page{margin-top:8px!important;margin-bottom:8px!important}.restore-modal{position:absolute!important;inset:auto 0 auto 0!important;z-index:100!important;align-items:center!important;justify-content:center!important;padding:20px!important;background:rgba(15,23,42,.6)!important;backdrop-filter:none!important}.restore-dialog{width:100%!important;max-width:430px!important;overflow:visible!important;border:1px solid #d1d5db!important;border-radius:16px!important;padding:21px!important;background:#fff!important;box-shadow:0 24px 80px rgba(0,0,0,.32)!important}.restore-dialog-header{padding:0!important;border:0!important}.restore-dialog-kicker{display:none!important}.restore-dialog h2{margin:0 0 8px!important;color:#1e3a8a!important;font-size:21px!important;line-height:1.2!important}.restore-dialog-body{padding:0!important;color:#374151!important;font-size:16px!important;line-height:1.45!important}.restore-dialog-body p{margin:8px 0 15px!important}.restore-dialog-actions{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;padding:0!important}.restore-dialog-actions button{width:100%!important;min-height:43px!important;border:1px solid #1e3a8a!important;border-radius:9px!important;padding:9px 11px!important;background:#1e3a8a!important;color:#fff!important;font-size:13.3333px!important;font-weight:800!important}.restore-dialog-actions button.restore-secondary{background:#fff!important;color:#1e3a8a!important}@media(min-width:520px){.restore-dialog-actions{grid-template-columns:1fr 1fr!important}}}';
-    if(d.body)d.body.classList.remove('access-locked');
-    const title=d.getElementById('restoreModalTitle');
-    if(title)title.textContent='LoadCalcPro';
-    const body=d.querySelector('.restore-dialog-body');
-    if(body)body.innerHTML='<p><strong>A previous calculation was found.</strong></p><p>Would you like to continue your previous calculation or start a new one?</p>';
-    const actions=d.querySelector('.restore-dialog-actions');
-    const start=d.getElementById('startNewBtn');
-    const cont=d.getElementById('continuePreviousBtn');
-    if(start){start.textContent='Start New Calculation';start.classList.add('restore-secondary')}
-    if(actions&&start&&cont){actions.appendChild(start);actions.appendChild(cont)}
-    reorderWireSizes();syncPanelCapacity();positionRestoreModal();
-  }
-  function reorderWireSizes(){
-    const d=doc();if(!d)return;
-    d.querySelectorAll('select').forEach(sel=>{
-      const opts=Array.from(sel.options);
-      if(!opts.some(o=>o.value==='1000MCM')||!opts.some(o=>o.value==='8'))return;
-      const current=sel.value,placeholder=opts.find(o=>o.value===''),byValue=new Map(opts.map(o=>[o.value,o]));
-      sel.innerHTML='';
-      if(placeholder)sel.appendChild(placeholder);
-      wireOrder.forEach(v=>{const o=byValue.get(v);if(o)sel.appendChild(o)});
-      if(byValue.has(current))sel.value=current;
-    });
-  }
-  function resizeFrame(){
-    const d=doc();if(!d)return;
-    requestAnimationFrame(()=>{
-      const b=d.body,h=d.documentElement;
-      const height=Math.max(b?b.scrollHeight:0,b?b.offsetHeight:0,h?h.scrollHeight:0,h?h.offsetHeight:0);
-      if(height)frame.style.height=(height+4)+'px';
-      positionRestoreModal();
-    });
-  }
+  function removeToOnePanel(){const current=cards();while(current.length>1)current.pop().remove();syncPanelCapacity();}
+  function clearStaleRestore(){if(hasMeaningfulAicSavedData())return;try{localStorage.removeItem(aicStorageKey)}catch(e){}const d=doc(),w=win();const modal=d&&d.getElementById('restoreModal');if(modal)modal.classList.remove('show');try{if(w&&typeof w.startNewCalculation==='function')w.startNewCalculation()}catch(e){}removeToOnePanel();}
+  function startFreshAicWorkspace(){const d=doc(),w=win();if(!d||!w)return;try{removeToOnePanel();if(typeof w.resetCalculator==='function')w.resetCalculator(1);else{d.querySelectorAll('#calculationsContainer input').forEach(node=>node.value='');d.querySelectorAll('#calculationsContainer select').forEach(node=>node.value='');}if(typeof w.removePrintPages==='function')w.removePrintPages();if(typeof w.startNewCalculation==='function')w.startNewCalculation();try{localStorage.removeItem(aicStorageKey)}catch(e){}if(typeof w.updateAllSelectPlaceholders==='function')w.updateAllSelectPlaceholders();if(typeof w.calculate==='function')w.calculate(1);syncPanelCapacity();}catch(e){}reorderWireSizes();setTimeout(resizeFrame,50);}
+  function addEighthPanel(event){const d=doc(),w=win();if(!d||!w)return;const count=cards().length;if(count!==7)return;event.preventDefault();event.stopImmediatePropagation();try{if(typeof w.createPanel==='function')w.createPanel(8);if(typeof w.updateAllSelectPlaceholders==='function')w.updateAllSelectPlaceholders();if(typeof w.saveCurrentValues==='function')w.saveCurrentValues();}catch(e){}reorderWireSizes();syncPanelCapacity();setTimeout(resizeFrame,50);}
+  function removeSecondPanel(event){const d=doc(),w=win();if(!d||!w)return;if(cards().length!==2)return;event.preventDefault();event.stopImmediatePropagation();const second=d.querySelector('[data-panel-index="2"]');if(second)second.remove();try{if(w&&typeof w.saveCurrentValues==='function')w.saveCurrentValues()}catch(e){}syncPanelCapacity();setTimeout(resizeFrame,50);}
+  function positionRestoreModal(){const d=doc();if(!d)return;const modal=d.getElementById('restoreModal');if(!modal)return;const rect=frame.getBoundingClientRect();const visibleTop=Math.max(0,-rect.top);const visibleBottom=Math.min(frame.offsetHeight,window.innerHeight-rect.top);const visibleHeight=Math.max(0,visibleBottom-visibleTop);modal.style.top=visibleTop+'px';modal.style.height=(visibleHeight||window.innerHeight)+'px';}
+  function prepareInnerPage(){const d=doc();if(!d)return;clearStaleRestore();let s=d.getElementById('xUnifiedAicHeader');if(!s){s=d.createElement('style');s.id='xUnifiedAicHeader';d.head.appendChild(s)}s.textContent='@media screen{.form-titlebar,#accessGate{display:none!important}body.access-locked{overflow:auto!important}.page{margin-top:8px!important;margin-bottom:8px!important}.restore-modal{position:absolute!important;inset:auto 0 auto 0!important;z-index:100!important;align-items:center!important;justify-content:center!important;padding:20px!important;background:rgba(15,23,42,.6)!important;backdrop-filter:none!important}.restore-dialog{width:100%!important;max-width:430px!important;overflow:visible!important;border:1px solid #d1d5db!important;border-radius:16px!important;padding:21px!important;background:#fff!important;box-shadow:0 24px 80px rgba(0,0,0,.32)!important}.restore-dialog-header{padding:0!important;border:0!important}.restore-dialog-kicker{display:none!important}.restore-dialog h2{margin:0 0 8px!important;color:#1e3a8a!important;font-size:21px!important;line-height:1.2!important}.restore-dialog-body{padding:0!important;color:#374151!important;font-size:16px!important;line-height:1.45!important}.restore-dialog-body p{margin:8px 0 15px!important}.restore-dialog-actions{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;padding:0!important}.restore-dialog-actions button{width:100%!important;min-height:43px!important;border:1px solid #1e3a8a!important;border-radius:9px!important;padding:9px 11px!important;background:#1e3a8a!important;color:#fff!important;font-size:13.3333px!important;font-weight:800!important}.restore-dialog-actions button.restore-secondary{background:#fff!important;color:#1e3a8a!important}@media(min-width:520px){.restore-dialog-actions{grid-template-columns:1fr 1fr!important}}}';if(d.body)d.body.classList.remove('access-locked');const title=d.getElementById('restoreModalTitle');if(title)title.textContent='LoadCalcPro';const body=d.querySelector('.restore-dialog-body');if(body)body.innerHTML='<p><strong>A previous calculation was found.</strong></p><p>Would you like to continue your previous calculation or start a new one?</p>';const actions=d.querySelector('.restore-dialog-actions');const start=d.getElementById('startNewBtn');const cont=d.getElementById('continuePreviousBtn');if(start){start.textContent='Start New Calculation';start.classList.add('restore-secondary')}if(actions&&start&&cont){actions.appendChild(start);actions.appendChild(cont)}reorderWireSizes();syncPanelCapacity();positionRestoreModal();}
+  function reorderWireSizes(){const d=doc();if(!d)return;d.querySelectorAll('select').forEach(sel=>{const opts=Array.from(sel.options);if(!opts.some(o=>o.value==='1000MCM')||!opts.some(o=>o.value==='8'))return;const current=sel.value,placeholder=opts.find(o=>o.value===''),byValue=new Map(opts.map(o=>[o.value,o]));sel.innerHTML='';if(placeholder)sel.appendChild(placeholder);wireOrder.forEach(v=>{const o=byValue.get(v);if(o)sel.appendChild(o)});if(byValue.has(current))sel.value=current;});}
+  function resizeFrame(){const d=doc();if(!d)return;requestAnimationFrame(()=>{const b=d.body,h=d.documentElement;const height=Math.max(b?b.scrollHeight:0,b?b.offsetHeight:0,h?h.scrollHeight:0,h?h.offsetHeight:0);if(height)frame.style.height=(height+4)+'px';positionRestoreModal();});}
   function syncLayout(){const d=doc();const inner=d&&d.getElementById('printLayout');if(inner)layout.value=inner.value||'4'}
-  frame.addEventListener('load',function(){
-    const d=doc();if(!d)return;
-    prepareInnerPage();syncLayout();resizeFrame();
-    setTimeout(()=>{prepareInnerPage();resizeFrame()},150);
-    setTimeout(()=>{prepareInnerPage();resizeFrame()},600);
-    if(window.ResizeObserver&&d.body){if(resizeObserver)resizeObserver.disconnect();resizeObserver=new ResizeObserver(resizeFrame);resizeObserver.observe(d.body)}
-    const add=d.getElementById('addPanelBtn');if(add)add.addEventListener('click',addEighthPanel,true);
-    const remove=d.getElementById('removePanelBtn');if(remove)remove.addEventListener('click',removeSecondPanel,true);
-    d.addEventListener('click',function(){setTimeout(()=>{reorderWireSizes();syncPanelCapacity();resizeFrame()},50)},true);
-  });
-  window.addEventListener('resize',function(){resizeFrame();positionRestoreModal()});
-  window.addEventListener('scroll',positionRestoreModal,{passive:true});
-  document.getElementById('mainSiteBtn').addEventListener('click',()=>location.href='../index.html');
-  document.getElementById('calculatorsBtn').addEventListener('click',()=>location.href='../member-dashboard.html');
-  layout.addEventListener('change',function(){const d=doc(),inner=d&&d.getElementById('printLayout');if(inner){inner.value=layout.value;inner.dispatchEvent(new Event('change',{bubbles:true}))}});
-  document.getElementById('printBtn').addEventListener('click',function(){const w=win();if(w&&typeof w.preparePrint==='function')w.preparePrint()});
-  document.getElementById('newCalculationBtn').addEventListener('click',startFreshAicWorkspace);
+  frame.addEventListener('load',function(){const d=doc();if(!d)return;prepareInnerPage();syncLayout();resizeFrame();setTimeout(()=>{prepareInnerPage();resizeFrame()},150);setTimeout(()=>{prepareInnerPage();resizeFrame()},600);if(window.ResizeObserver&&d.body){if(resizeObserver)resizeObserver.disconnect();resizeObserver=new ResizeObserver(resizeFrame);resizeObserver.observe(d.body)}const add=d.getElementById('addPanelBtn');if(add)add.addEventListener('click',addEighthPanel,true);const remove=d.getElementById('removePanelBtn');if(remove)remove.addEventListener('click',removeSecondPanel,true);d.addEventListener('click',function(){setTimeout(()=>{reorderWireSizes();syncPanelCapacity();resizeFrame()},50)},true);});
+  window.addEventListener('resize',function(){resizeFrame();positionRestoreModal()});window.addEventListener('scroll',positionRestoreModal,{passive:true});document.getElementById('mainSiteBtn').addEventListener('click',()=>location.href='../index.html');document.getElementById('calculatorsBtn').addEventListener('click',()=>location.href='../member-dashboard.html');layout.addEventListener('change',function(){const d=doc(),inner=d&&d.getElementById('printLayout');if(inner){inner.value=layout.value;inner.dispatchEvent(new Event('change',{bubbles:true}))}});document.getElementById('printBtn').addEventListener('click',function(){const w=win();if(w&&typeof w.preparePrint==='function')w.preparePrint()});document.getElementById('newCalculationBtn').addEventListener('click',startFreshAicWorkspace);
 })();
 </script>
 <script src="motor-contribution.js"></script>
+<script src="aic-display.js"></script>
 </body>
 </html>

@@ -17,7 +17,7 @@
   function typeFor(kind,index){return kind+(index===1?'':index)}
   function key(method,type){return method+'_'+type}
   function item(method,type){return readJSON(DATA_KEY,{})[key(method,type)]||{}}
-  function qty(method,type){return Math.max(0,Math.floor(Number(item(method,type).qty)||0)}
+  function qty(method,type){return Math.max(0,Math.floor(Number(item(method,type).qty)||0))}
   function va(method,type){return Math.max(0,Number(item(method,type).va)||0)}
   function total(method,type){return qty(method,type)*va(method,type)}
   function managedQty(method,type){const q=qty(method,type),raw=readJSON(MANAGED_KEY,{})[key(method,type)],n=raw===true?q:Math.floor(Number(raw)||0);return Math.max(0,Math.min(q,n))}
@@ -116,7 +116,6 @@
       const check=document.getElementById('m'+row),qty=document.getElementById('mq'+row);
       if(check&&!check.dataset.continuousManagedBound){
         check.dataset.continuousManagedBound='1';
-        /* 42 and 43 are already connected by the core. Row 47 was omitted there. */
         if(row===47)check.addEventListener('click',()=>{if(typeof toggleManaged==='function')toggleManaged(row)});
       }
       if(qty&&!qty.dataset.continuousManagedBound){

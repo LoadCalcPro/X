@@ -17,7 +17,7 @@
   function typeFor(kind,index){return kind+(index===1?'':index)}
   function key(method,type){return method+'_'+type}
   function item(method,type){return readJSON(DATA_KEY,{})[key(method,type)]||{}}
-  function qty(method,type){return Math.max(0,Math.floor(Number(item(method,type).qty)||0))}
+  function qty(method,type){return Math.max(0,Math.floor(Number(item(method,type).qty)||0)}
   function va(method,type){return Math.max(0,Number(item(method,type).va)||0)}
   function total(method,type){return qty(method,type)*va(method,type)}
   function managedQty(method,type){const q=qty(method,type),raw=readJSON(MANAGED_KEY,{})[key(method,type)],n=raw===true?q:Math.floor(Number(raw)||0);return Math.max(0,Math.min(q,n))}
@@ -31,7 +31,7 @@
   window.hvacLoadCalculation=function(){original();let service=0,generator=0,serviceAC=0,generatorAC=0,serviceHeating=0,generatorHeating=0;selected().forEach(method=>{let s,g;if(method==='heatpump'){s=heatPumpResult(false);g=heatPumpResult(true)}else{s=normalResult(method,false);g=normalResult(method,true)}service+=s.total;generator+=g.total;serviceAC+=s.c;generatorAC+=g.c;serviceHeating+=s.h;generatorHeating+=g.h});if(typeof setOutput==='function'){setOutput('e37',serviceAC);setOutput('e38',serviceHeating);setOutput('f37',generatorAC);setOutput('f38',generatorHeating)}return{service,generator,serviceAC,generatorAC,serviceHeating,generatorHeating,method:selected().join(','),multipleHeatTypes:selected().length>1}}
 })();
 
-/* Staging hotfix: keep each heat-pump system's Yes/No choice independent. */
+/* Keep each heat-pump system's Yes/No choice independent. */
 (function(){
   'use strict';
   const HP_SYSTEM_KEY='loadcalcpro_hvac_heatpump_answers_v543',LEGACY_HP_KEY='loadcalcpro_hvac_multi_hp_answer_v1';
@@ -41,7 +41,7 @@
   document.addEventListener('click',function(event){const button=event.target.closest('.v543-hp-option');if(!button)return;event.preventDefault();event.stopImmediatePropagation();const index=String(button.dataset.v543HpIndex||''),answer=String(button.dataset.v543HpAnswer||'');if(!index||(answer!=='yes'&&answer!=='no'))return;const answers=readAnswers();if(answers[index]===answer)delete answers[index];else answers[index]=answer;writeAnswers(answers);refreshQuestion(index);if(typeof calculate==='function')calculate()},true)
 })();
 
-/* Staging layout refinement: keep the fixed Service/Generator result boxes symmetrical. */
+/* Keep the fixed Service/Generator result boxes symmetrical. */
 (function(){
   'use strict';
   function makeRow(label,valueNode,suffix){const row=document.createElement('div');row.className='calculation-summary-row';const labelNode=document.createElement('span');labelNode.textContent=label;const valueWrap=document.createElement('span');valueWrap.appendChild(valueNode);if(suffix)valueWrap.appendChild(document.createTextNode(suffix));row.appendChild(labelNode);row.appendChild(valueWrap);return row}
@@ -67,13 +67,125 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavigation,{once:true});else initNavigation();
 })();
 
-/* Load the coordinated Generator report/totals polish after the existing calculator hotfixes. */
+/* Final Generator totals, print presentation, and continuous managed-load fixes. */
 (function(){
   'use strict';
-  if(document.querySelector('script[data-generator-report-polish]'))return;
-  const script=document.createElement('script');
-  script.src='report-polish.js';
-  script.defer=true;
-  script.dataset.generatorReportPolish='true';
-  document.head.appendChild(script);
+
+  function numberFrom(id){
+    const el=document.getElementById(id);
+    if(!el)return 0;
+    const n=Number(String(el.textContent||'').replace(/[^0-9.-]/g,''));
+    return Number.isFinite(n)?n:0;
+  }
+  function textNumber(value){return Math.round(Number(value)||0).toLocaleString('en-US')}
+  function generalAppliance(){return{service:numberFrom('e8')+numberFrom('e31'),generator:numberFrom('f8')+numberFrom('f31')}}
+  function hvacContinuous(){return{service:numberFrom('e44')+numberFrom('e45'),generator:numberFrom('f44')+numberFrom('f45')}}
+
+  function makeInlineTotal(id,label,serviceId,generatorId){
+    const row=document.createElement('div');
+    row.id=id;
+    row.className='demand-row total checkpoint-total-row';
+    row.innerHTML='<span class="demand-description">'+label+'</span><span id="'+serviceId+'" class="demand-service"></span><span id="'+generatorId+'" class="demand-generator"></span>';
+    return row;
+  }
+
+  function ensureTotals(){
+    const demandBody=document.querySelector('#v3DemandCard .card-body');
+    if(demandBody&&!document.getElementById('generalApplianceTotalRow')){
+      const row=makeInlineTotal('generalApplianceTotalRow','Total General + Appliance Load','generalApplianceService','generalApplianceGenerator');
+      const first=demandBody.querySelector('.demand-row');
+      if(first)demandBody.insertBefore(row,first);else demandBody.appendChild(row);
+    }
+
+    const continuousBody=document.querySelector('.continuous-loads-card .card-body');
+    if(continuousBody&&!document.getElementById('hvacContinuousTotalRow')){
+      const row=makeInlineTotal('hvacContinuousTotalRow','Total HVAC + Continuous Load','hvacContinuousService','hvacContinuousGenerator');
+      continuousBody.appendChild(row);
+    }
+  }
+
+  function updateTotals(){
+    ensureTotals();
+    const ga=generalAppliance(),hc=hvacContinuous();
+    const values={generalApplianceService:ga.service,generalApplianceGenerator:ga.generator,hvacContinuousService:hc.service,hvacContinuousGenerator:hc.generator};
+    Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=textNumber(value)});
+  }
+
+  function bindContinuousManaged(){
+    [42,43,47].forEach(row=>{
+      const check=document.getElementById('m'+row),qty=document.getElementById('mq'+row);
+      if(check&&!check.dataset.continuousManagedBound){
+        check.dataset.continuousManagedBound='1';
+        /* 42 and 43 are already connected by the core. Row 47 was omitted there. */
+        if(row===47)check.addEventListener('click',()=>{if(typeof toggleManaged==='function')toggleManaged(row)});
+      }
+      if(qty&&!qty.dataset.continuousManagedBound){
+        qty.dataset.continuousManagedBound='1';
+        if(row===47)qty.addEventListener('click',event=>{event.stopPropagation();if(typeof reduceManagedQuantity==='function')reduceManagedQuantity(row)});
+      }
+    });
+  }
+
+  function printRow(label,service,generator,cls){
+    return '<tr class="'+cls+'"><td><strong>'+label+'</strong></td><td></td><td class="number"><strong>'+textNumber(service)+'</strong></td><td class="number"><strong>'+textNumber(generator)+'</strong></td></tr>';
+  }
+
+  function polishPrint(){
+    const report=document.getElementById('printReport');
+    if(!report)return;
+    const page=report.querySelector('.print-page'),table=report.querySelector('.print-table');
+    if(!page||!table)return;
+
+    const heading=page.querySelector('h1');
+    if(heading)heading.innerHTML='<div class="generator-print-heading"><div class="print-brand"><span class="print-brand-main">LoadCalc</span><span class="print-brand-accent">Pro X</span></div><div class="print-title-text">Optional Method Generator Calculation Report</div></div>';
+
+    table.querySelectorAll('.print-general-appliance-total,.print-hvac-continuous-total').forEach(r=>r.remove());
+    const ga=generalAppliance(),hc=hvacContinuous();
+    const rows=Array.from(table.querySelectorAll('tr'));
+    const demandSection=rows.find(r=>/^Demand Load$/i.test(String(r.textContent||'').trim()));
+    if(demandSection)demandSection.insertAdjacentHTML('afterend',printRow('Total General + Appliance Load',ga.service,ga.generator,'print-general-appliance-total checkpoint-print-row'));
+    const finalRow=table.querySelector('.final-total-row');
+    if(finalRow)finalRow.insertAdjacentHTML('beforebegin',printRow('Total HVAC + Continuous Load',hc.service,hc.generator,'print-hvac-continuous-total checkpoint-print-row'));
+  }
+
+  function installStyles(){
+    if(document.getElementById('generatorFinalPolishStyles'))return;
+    const s=document.createElement('style');
+    s.id='generatorFinalPolishStyles';
+    s.textContent=`
+.checkpoint-total-row{font-weight:800!important;background:#fbfcfe!important;border-top:1px solid #94a3b8!important}
+@media(max-width:899px){#hvacContinuousTotalRow{display:grid!important;grid-template-columns:1fr auto auto!important;gap:10px!important;padding:9px 0!important}}
+@media print{
+  .print-page{border:.6pt solid #cbd5e1!important;padding:.14in!important;box-sizing:border-box!important}
+  .print-page h1{display:block!important;margin:0 0 7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
+  .generator-print-heading{display:block!important}
+  .print-brand{display:block!important;margin:0 0 2px!important;font-size:12px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
+  .print-brand-main{color:#17377f!important}
+  .print-brand-accent{color:#0f766e!important;margin-left:2px!important}
+  .print-title-text{display:block!important;color:#111!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
+  .print-table{width:84%!important;margin-left:auto!important;margin-right:auto!important}
+  .print-table th:first-child,.print-table td:first-child{width:46%!important}
+  .print-table th:nth-child(2),.print-table td:nth-child(2){width:12%!important}
+  .print-table th:nth-child(3),.print-table td:nth-child(3),.print-table th:nth-child(4),.print-table td:nth-child(4){width:21%!important}
+  .checkpoint-print-row td{background:#fbfcfe!important;border-top:1px solid #94a3b8!important;font-weight:800!important}
+}`;
+    document.head.appendChild(s);
+  }
+
+  installStyles();
+  const originalCalculate=window.calculate;
+  if(typeof originalCalculate==='function'&&!window.__generatorFinalPolishWrapped){
+    window.calculate=function(){const result=originalCalculate.apply(this,arguments);updateTotals();return result};
+    window.__generatorFinalPolishWrapped=true;
+  }
+
+  window.printCalculation=function(){
+    if(typeof window.calculate==='function')window.calculate();
+    updateTotals();
+    polishPrint();
+    window.print();
+  };
+
+  function init(){bindContinuousManaged();ensureTotals();updateTotals();setTimeout(()=>{bindContinuousManaged();updateTotals()},100)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

@@ -22,6 +22,14 @@ function observe(id){
   new MutationObserver(syncBottomResults).observe(el,{childList:true,characterData:true,subtree:true});
 }
 
+function loadPrintRenderer(){
+  if(document.querySelector('script[data-generator-print-renderer]'))return;
+  const script=document.createElement('script');
+  script.src='print-report.js';
+  script.dataset.generatorPrintRenderer='1';
+  document.body.appendChild(script);
+}
+
 function init(){
   syncBottomResults();
   observe('serviceAmps');
@@ -29,6 +37,7 @@ function init(){
   document.addEventListener('input',function(){setTimeout(syncBottomResults,0)});
   document.addEventListener('change',function(){setTimeout(syncBottomResults,0)});
   document.addEventListener('click',function(){setTimeout(syncBottomResults,0)});
+  loadPrintRenderer();
 }
 
 if(document.readyState==='loading'){

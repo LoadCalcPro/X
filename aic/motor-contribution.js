@@ -18,7 +18,8 @@
   };
 
   /* NEC Table 430.250 — induction-type squirrel-cage and wound-rotor three-phase AC motors.
-     240 V systems use the 230 V column and 480 V systems use the 460 V column. */
+     240 V systems use the 230 V column, 480 V systems use the 460 V column,
+     and 600 V systems use the 575 V column (550–600 V system range). */
   const threePhaseFLC={
     '208':{
       '0.5':2.4,'0.75':3.5,'1':4.6,'1.5':6.6,'2':7.5,'3':10.6,'5':16.7,'7.5':24.2,
@@ -35,6 +36,12 @@
       '10':14,'15':21,'20':27,'25':34,'30':40,'40':52,'50':65,'60':77,'75':96,
       '100':124,'125':156,'150':180,'200':240,'250':302,'300':361,'350':414,
       '400':477,'450':515,'500':590
+    },
+    '600':{
+      '0.5':0.9,'0.75':1.3,'1':1.7,'1.5':2.4,'2':2.7,'3':3.9,'5':6.1,'7.5':9,
+      '10':11,'15':17,'20':22,'25':27,'30':32,'40':41,'50':52,'60':62,'75':77,
+      '100':99,'125':125,'150':144,'200':192,'250':242,'300':289,'350':336,
+      '400':382,'450':412,'500':472
     }
   };
 
@@ -94,14 +101,31 @@
   function formatNumber(value,digits){
     return Number.isFinite(value)?value.toLocaleString(undefined,{maximumFractionDigits:digits,minimumFractionDigits:digits}):'—';
   }
+  function numberFromNode(node){
+    if(!node)return null;
+    const value=String(node.value??node.textContent??'').replace(/,/g,'').trim();
+    if(value==='')return null;
+    const n=Number(value);
+    return Number.isFinite(n)?n:null;
+  }
   function voltageOptions(phase,current){
-    const values=phase==='single'?['208','240']:phase==='three'?['208','240','480']:[];
+    const values=phase==='single'?['208','240']:phase==='three'?['208','240','480','600']:[];
     return '<option value="">Select voltage</option>'+values.map(v=>`<option value="${v}"${v===current?' selected':''}>${v} V</option>`).join('');
   }
   function hpOptions(row){
     const table=flcTable(row.phase);
     const values=table&&table[row.voltage]?Object.keys(table[row.voltage]):[];
     return '<option value="">Select horsepower</option>'+values.map(v=>`<option value="${v}"${v===row.hp?' selected':''}>${hpLabels[v]||v} HP</option>`).join('');
+  }
+  function install600VoltageOptions(d){
+    d.querySelectorAll('select[id^="volts"]').forEach(select=>{
+      if(!Array.from(select.options).some(option=>option.value==='600')){
+        const option=d.createElement('option');
+        option.value='600';
+        option.textContent='600';
+        select.appendChild(option);
+      }
+    });
   }
   function motorStyles(d){
     if(d.getElementById('loadCalcProMotorStyles'))return;
@@ -126,9 +150,15 @@
         .motor-row-actions button,.motor-footer button,.motor-panel-header button{min-height:36px;padding:7px 10px;font-size:12px;border-radius:8px}
         .motor-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0}
         .motor-total{font-size:13px;font-weight:800;color:#0f3557}
-        .motor-calc-summary{margin-top:8px;padding-top:7px;border-top:1px solid #cbd5e1;color:#0f3557;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800}
+        .motor-calc-summary{margin-top:9px;padding-top:8px;border-top:1px solid #cbd5e1;font-family:Arial,Helvetica,sans-serif;color:#0f172a}
+        .motor-work-block{margin-top:8px}
+        .motor-work-title{font-size:13px;font-weight:800;color:#17365d;margin-bottom:5px}
+        .motor-work-line{display:grid;grid-template-columns:92px 1fr;gap:8px;font-size:13px;line-height:1.45;margin:2px 0}
+        .motor-work-label{font-weight:800;color:#475569}
+        .motor-work-value{font-family:Consolas,Monaco,monospace;overflow-wrap:anywhere}
+        .motor-total-work{margin-top:7px;padding-top:6px;border-top:1px solid #e2e8f0;font-weight:800}
         @media(max-width:850px){.motor-row-grid{grid-template-columns:1fr 1fr 1fr}}
-        @media(max-width:560px){.motor-row-grid{grid-template-columns:1fr 1fr}.motor-panel-header,.motor-footer{align-items:flex-start;flex-direction:column}}
+        @media(max-width:560px){.motor-row-grid{grid-template-columns:1fr 1fr}.motor-panel-header,.motor-footer{align-items:flex-start;flex-direction:column}.motor-work-line{grid-template-columns:1fr}}
       }
       @media print{.motor-contribution-wrap,.motor-calc-summary{display:none!important}}
     `;
@@ -269,6 +299,35 @@
     if(w&&typeof w.calculate==='function'){try{w.calculate(n)}catch(e){}}
   }
   function resizeParent(){try{window.dispatchEvent(new Event('resize'))}catch(e){}}
+  function formulaCalculationHtml(d,n,baseAic,contribution,total){
+    const suffix=n===1?'':n;
+    const L=numberFromNode(d.getElementById('distance'+suffix));
+    const I=numberFromNode(d.getElementById('utilityFault'+suffix));
+    const E=numberFromNode(d.getElementById('volts'+suffix));
+    const N=numberFromNode(d.getElementById('conductors'+suffix));
+    const phase=numberFromNode(d.getElementById('phase'+suffix));
+    const C=numberFromNode(d.getElementById('cConstant'+suffix));
+    if(![L,I,E,N,phase,C].every(Number.isFinite))return '';
+    const F=(phase*L*I)/(N*C*E);
+    const M=1/(1+F);
+    const phaseFactor=phase===2?'2':'1.732';
+    const motorState=getPanelState(n);
+    let motorHtml='';
+    if(motorState.enabled&&contribution>0){
+      const motorRows=motorState.rows.map((row,index)=>{
+        const flc=flcValue(row),factor=factorValue(row),qty=Number(row.quantity),rowTotal=rowContribution(row);
+        if(!Number.isFinite(flc)||!Number.isFinite(factor)||!Number.isFinite(qty)||!Number.isFinite(rowTotal))return '';
+        return `<div class="motor-work-block"><div class="motor-work-title">Motor ${motorState.rows.length>1?index+1:''}</div><div class="motor-work-line"><span class="motor-work-label">Formula</span><span class="motor-work-value">Motor Contribution = NEC Table FLC × Quantity × Contribution Factor</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">${formatNumber(flc,1)} × ${qty} × ${formatNumber(factor,1)} = ${formatNumber(rowTotal,0)} A</span></div></div>`;
+      }).join('');
+      motorHtml=`${motorRows}<div class="motor-work-line motor-total-work"><span class="motor-work-label">Formula</span><span class="motor-work-value">Total AIC = Available Fault Current + Motor Contribution</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">${formatNumber(baseAic,0)} + ${formatNumber(contribution,0)} = ${formatNumber(total,0)} A</span></div>`;
+    }
+    return `<div class="motor-calc-summary">
+      <div class="motor-work-block"><div class="motor-work-title">Fault Current Factor</div><div class="motor-work-line"><span class="motor-work-label">Formula</span><span class="motor-work-value">F = ${phaseFactor} × L × I ÷ (N × C × V)</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">F = ${phaseFactor} × ${formatNumber(L,0)} × ${formatNumber(I,0)} ÷ (${formatNumber(N,0)} × ${formatNumber(C,0)} × ${formatNumber(E,0)}) = ${F.toFixed(4)}</span></div></div>
+      <div class="motor-work-block"><div class="motor-work-title">Multiplier</div><div class="motor-work-line"><span class="motor-work-label">Formula</span><span class="motor-work-value">M = 1 ÷ (1 + F)</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">M = 1 ÷ (1 + ${F.toFixed(4)}) = ${M.toFixed(4)}</span></div></div>
+      <div class="motor-work-block"><div class="motor-work-title">Available Fault Current</div><div class="motor-work-line"><span class="motor-work-label">Formula</span><span class="motor-work-value">Isc = I × M</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">Isc = ${formatNumber(I,0)} × ${M.toFixed(4)} = ${formatNumber(baseAic,0)} A</span></div></div>
+      ${motorHtml}
+    </div>`;
+  }
   function applyMotorToCalculatedResult(w,d,n){
     const suffix=n===1?'':n;
     const result=d.getElementById('aicResult'+suffix);
@@ -280,12 +339,8 @@
     const contribution=panelContribution(n);
     const total=base+contribution;
     result.textContent=Math.round(total).toLocaleString();
-    if(contribution>0){
-      const summary=d.createElement('div');
-      summary.className='motor-calc-summary';
-      summary.textContent='Base AIC '+Math.round(base).toLocaleString()+' A + Motor Contribution '+Math.round(contribution).toLocaleString()+' A = Total AIC '+Math.round(total).toLocaleString()+' A';
-      details.appendChild(summary);
-    }
+    const work=formulaCalculationHtml(d,n,base,contribution,total);
+    if(work)details.insertAdjacentHTML('beforeend',work);
     if(n===1){
       const next=d.getElementById('utilityFault2');
       if(next){
@@ -351,6 +406,7 @@
   }
   function install(){
     const d=innerDoc();if(!d)return;
+    install600VoltageOptions(d);
     installCalculationWrapper();
     installMotorSections();
     installResetHooks();

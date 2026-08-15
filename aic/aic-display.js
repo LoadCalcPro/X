@@ -8,7 +8,7 @@
   function w(){try{return frame.contentWindow}catch(e){return null}}
   function suffix(n){return n===1?'':String(n)}
   function node(base,n){const doc=d();return doc?doc.getElementById(base+suffix(n)):null}
-  function num(v){const x=Number(String(v??'').replace(/,/g,'').trim());return Number.isFinite(x)?x:null}
+  function num(v){const text=String(v??'').replace(/,/g,'').trim();const match=text.match(/[-+]?\d*\.?\d+/);if(!match)return null;const x=Number(match[0]);return Number.isFinite(x)?x:null}
   function val(base,n){const el=node(base,n);return el?num(el.value):null}
   function fmt(v,digits=0){return Number.isFinite(v)?v.toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—'}
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}

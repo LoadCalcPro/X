@@ -7,14 +7,31 @@ function outputNumber(id){
   const n=Number(String(el.textContent||'').replace(/[^0-9.-]/g,''));
   return Number.isFinite(n)?n:0;
 }
+function inputNumber(id){
+  const el=document.getElementById(id);
+  const n=Number(el?el.value:0);
+  return Number.isFinite(n)?n:0;
+}
 function displayNumber(value){
   const n=Math.round(Number(value)||0);
   return n.toLocaleString('en-US');
 }
+function generalLoadTotal(){
+  const squareFeet=Math.max(inputNumber('q5'),0);
+  const smallAppliance=Math.max(Math.floor(inputNumber('q6')),0);
+  const laundry=Math.max(Math.floor(inputNumber('q7')),0);
+  return (squareFeet*3)+(smallAppliance*1500)+(laundry*1500);
+}
+function applianceColumnTotal(prefix){
+  let total=0;
+  for(let row=10;row<=30;row++)total+=outputNumber(prefix+row);
+  return total;
+}
 function generalApplianceTotals(){
+  const general=generalLoadTotal();
   return {
-    service:outputNumber('e8')+outputNumber('e31'),
-    generator:outputNumber('f8')+outputNumber('f31')
+    service:general+applianceColumnTotal('e'),
+    generator:general+applianceColumnTotal('f')
   };
 }
 function hvacContinuousTotals(){

@@ -123,7 +123,7 @@
     event.preventDefault();event.stopImmediatePropagation();
     const second=d.querySelector('[data-panel-index="2"]');
     if(second)second.remove();
-    try{if(typeof w.saveCurrentValues==='function')w.saveCurrentValues()}catch(e){}
+    try{if(w&&typeof w.saveCurrentValues==='function')w.saveCurrentValues()}catch(e){}
     syncPanelCapacity();setTimeout(resizeFrame,50);
   }
   function positionRestoreModal(){
@@ -196,5 +196,6 @@
   document.getElementById('newCalculationBtn').addEventListener('click',startFreshAicWorkspace);
 })();
 </script>
+<script src="motor-contribution.js"></script>
 </body>
 </html>

@@ -152,13 +152,32 @@
     const heading=page.querySelector('h1');
     if(heading)heading.innerHTML='<div class="generator-print-heading"><div class="print-brand"><span class="print-brand-main">LoadCalc</span><span class="print-brand-accent">Pro X</span></div><div class="print-title-text">Optional Method Generator Calculation Report</div></div>';
 
+    /* The compact table already contains the final VA and amp totals. Keep the details box for unique information only. */
+    const details=page.querySelector('.print-method-details');
+    if(details){
+      Array.from(details.children).forEach(function(item){
+        const text=String(item.textContent||'').trim();
+        if(/^Service Total:/i.test(text)||/^Generator Total:/i.test(text))item.remove();
+      });
+    }
+
     table.querySelectorAll('.print-general-appliance-total,.print-hvac-continuous-total').forEach(r=>r.remove());
     const ga=generalAppliance(),hc=hvacContinuous();
-    const rows=Array.from(table.querySelectorAll('tr'));
-    const demandSection=rows.find(r=>/^Demand Load$/i.test(String(r.textContent||'').trim()));
-    if(demandSection)demandSection.insertAdjacentHTML('afterend',printRow('Total General + Appliance Load',ga.service,ga.generator,'print-general-appliance-total checkpoint-print-row'));
-    const finalRow=table.querySelector('.final-total-row');
-    if(finalRow)finalRow.insertAdjacentHTML('beforebegin',printRow('Total HVAC + Continuous Load',hc.service,hc.generator,'print-hvac-continuous-total checkpoint-print-row'));
+    const tbody=table.querySelector('tbody');
+    const tfoot=table.querySelector('tfoot');
+    if(tbody){
+      const firstHvac=Array.from(tbody.querySelectorAll('tr')).find(function(r){
+        const text=String(r.cells&&r.cells[0]?r.cells[0].textContent:'').trim();
+        return /Air Conditioning|Heating|Heat Pump|Central Electric Heat|Separately Controlled/i.test(text);
+      });
+      const gaHtml=printRow('Total General + Appliance Load',ga.service,ga.generator,'print-general-appliance-total checkpoint-print-row');
+      if(firstHvac)firstHvac.insertAdjacentHTML('beforebegin',gaHtml);else tbody.insertAdjacentHTML('beforeend',gaHtml);
+    }
+    if(tfoot){
+      const firstFooterRow=tfoot.querySelector('tr');
+      const hcHtml=printRow('Total HVAC + Continuous Load',hc.service,hc.generator,'print-hvac-continuous-total checkpoint-print-row');
+      if(firstFooterRow)firstFooterRow.insertAdjacentHTML('beforebegin',hcHtml);else tfoot.insertAdjacentHTML('afterbegin',hcHtml);
+    }
   }
 
   function installStyles(){
@@ -169,14 +188,16 @@
 .checkpoint-total-row{font-weight:800!important;background:#fbfcfe!important;border-top:1px solid #94a3b8!important}
 @media(max-width:899px){#hvacContinuousTotalRow{display:grid!important;grid-template-columns:1fr auto auto!important;gap:10px!important;padding:9px 0!important}}
 @media print{
-  .print-page{border:.6pt solid #cbd5e1!important;padding:.14in!important;box-sizing:border-box!important}
-  .print-page h1{display:block!important;margin:0 0 7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
+  .print-page{width:84%!important;margin:0 auto!important;border:.6pt solid #cbd5e1!important;padding:.14in!important;box-sizing:border-box!important}
+  .print-page h1,.print-project,.print-method-details,.print-table,.print-code-note{width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important}
+  .print-page h1{display:block!important;margin-top:0!important;margin-bottom:7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
   .generator-print-heading{display:block!important}
   .print-brand{display:block!important;margin:0 0 2px!important;font-size:12px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
   .print-brand-main{color:#17377f!important}
   .print-brand-accent{color:#0f766e!important;margin-left:2px!important}
   .print-title-text{display:block!important;color:#111!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
-  .print-table{width:84%!important;margin-left:auto!important;margin-right:auto!important}
+  .print-method-details{grid-template-columns:1fr 1fr!important}
+  .print-table{table-layout:fixed!important}
   .print-table th:first-child,.print-table td:first-child{width:46%!important}
   .print-table th:nth-child(2),.print-table td:nth-child(2){width:12%!important}
   .print-table th:nth-child(3),.print-table td:nth-child(3),.print-table th:nth-child(4),.print-table td:nth-child(4){width:21%!important}

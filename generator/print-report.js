@@ -79,12 +79,6 @@ function hvacLabel(row){
   return row===37||row===39?'Air Conditioning':'Heating';
 }
 
-function hvacMethod(){
-  if(typeof window.getHVACMethodSummary==='function')return window.getHVACMethodSummary();
-  if(typeof printHVACMethod==='function')return printHVACMethod();
-  return '';
-}
-
 function installStyle(){
   if(document.getElementById('generatorPrintSingleSourceStyle'))return;
   const style=document.createElement('style');
@@ -102,7 +96,6 @@ function installStyle(){
   .print-brand-accent{margin-left:2px!important;color:#0f766e!important}
   .print-title-text{display:block!important;color:#222!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
   .print-project{display:grid!important;grid-template-columns:1fr 1fr!important;gap:3px 12px!important;margin:0 0 5px!important;padding:0 0 5px!important;border-bottom:1px solid #c7cdd4!important;color:#222!important;font-size:9px!important;line-height:1.25!important}
-  .print-hvac-method{margin:0 0 5px!important;padding:4px 5px!important;border:1px solid #cfd4da!important;border-left:3px solid #4b5563!important;background:#f7f7f7!important;color:#222!important;font-size:8.2px!important;line-height:1.25!important}
   .print-table{width:100%!important;margin:0!important;border-collapse:collapse!important;table-layout:fixed!important}
   .print-table th,.print-table td{height:20px!important;padding:2px 4px!important;border:1px solid #cfd4da!important;color:#222!important;font-size:8.4px!important;line-height:1.15!important;vertical-align:middle!important}
   .print-table thead th{background:#f3f4f6!important;color:#222!important;border-top:1.2px solid #6b7280!important;border-bottom:1.2px solid #6b7280!important;font-size:8px!important;font-weight:800!important;text-align:center!important}
@@ -114,8 +107,10 @@ function installStyle(){
   .print-table .print-section-row td{background:#e8edf3!important;color:#222!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.02em!important;text-align:left!important}
   .print-table .subtotal-row td,.print-table .demand-total-row td,.print-table .hvac-continuous-total-row td{background:#f7f7f7!important;color:#222!important;font-weight:800!important}
   .print-table .demand-breakdown-row td{background:#fff!important;color:#222!important;font-weight:400!important}
-  .print-table .report-info-row td{background:#fff!important;color:#222!important;font-weight:400!important;border-top:1px solid #94a3b8!important}
-  .print-table .report-info-row td:first-child{font-weight:700!important}
+  .print-table .report-info-row td{background:#fff!important;color:#222!important;font-weight:400!important;border-top:1px solid #94a3b8!important;text-align:left!important;padding:4px 8px!important}
+  .print-table .report-info-row .info-pair{display:flex!important;align-items:baseline!important;gap:6px!important;white-space:nowrap!important}
+  .print-table .report-info-row .info-label{font-weight:800!important;color:#222!important}
+  .print-table .report-info-row .info-value{font-weight:400!important;color:#222!important}
   .print-table .final-total-row td,.print-table .final-amps-row td{background:#fff!important;color:#222!important;border-top:1.5px solid #4b5563!important;font-weight:900!important}
   .print-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
 }
@@ -174,7 +169,7 @@ window.updatePrintRows=function(data){
   if(continuousRows){body+=sectionRow('Continuous Loads')+continuousRows;}
 
   body+=totalRow('Total HVAC + Continuous Load',hvacContinuousService,hvacContinuousGenerator,'hvac-continuous-total-row');
-  body+='<tr class="report-info-row"><td><strong>Service Voltage:</strong> '+num(data.voltage)+' V</td><td></td><td colspan="2"><strong>Managed Quantity:</strong> '+num(data.managedLoadCount)+'</td></tr>';
+  body+='<tr class="report-info-row"><td colspan="2"><div class="info-pair"><span class="info-label">Service Voltage:</span><span class="info-value">'+num(data.voltage)+' V</span></div></td><td colspan="2"><div class="info-pair"><span class="info-label">Managed Quantity:</span><span class="info-value">'+num(data.managedLoadCount)+'</span></div></td></tr>';
   body+=totalRow('Total VA',data.serviceTotalVA,data.generatorTotalVA,'final-total-row');
   body+='<tr class="final-amps-row"><td><strong>Calculated Amps</strong></td><td></td><td class="number"><strong>'+Math.ceil(Number(data.serviceCurrent)||0)+' A</strong></td><td class="number"><strong>'+Math.ceil(Number(data.generatorCurrent)||0)+' A</strong></td></tr>';
 
@@ -190,9 +185,8 @@ window.updatePrintRows=function(data){
     <div><strong>Address:</strong> '+esc(value('projectAddress'))+'</div>\
     <div><strong>City / State:</strong> '+esc(value('projectCityState'))+'</div>\
   </div>\
-  <div class="print-hvac-method"><strong>HVAC Method:</strong> '+esc(hvacMethod())+'</div>\
   <table class="print-table">\
-    <thead><tr><th>Description</th><th>Quantity</th><th>Service VA</th><th>Generator VA</th></tr></thead>\
+    <thead><tr><th>Description</th><th>Quantity</th><th>Service Load</th><th>Generator Load</th></tr></thead>\
     <tbody>'+body+'</tbody>\
   </table>\
 </div>';

@@ -45,46 +45,27 @@
     '150':'150','200':'200','250':'250','300':'300','350':'350','400':'400','450':'450','500':'500'
   };
 
-  function innerDoc(){
-    try{return frame.contentDocument||frame.contentWindow.document}catch(e){return null}
+  function innerDoc(){try{return frame.contentDocument||frame.contentWindow.document}catch(e){return null}}
+  function innerWin(){try{return frame.contentWindow}catch(e){return null}}
+  function panelNumber(card,index){return Number(card.dataset.panelIndex||card.dataset.calc||index+1)||index+1}
+  function loadState(){try{return JSON.parse(localStorage.getItem(MOTOR_STORAGE_KEY)||'{}')||{}}catch(e){return{}}}
+  function saveState(state){try{localStorage.setItem(MOTOR_STORAGE_KEY,JSON.stringify(state))}catch(e){}}
+  function clearAllMotorState(){try{localStorage.removeItem(MOTOR_STORAGE_KEY)}catch(e){}}
+  function removeMotorUi(){
+    const d=innerDoc();
+    if(!d)return;
+    d.querySelectorAll('.motor-contribution-wrap').forEach(node=>node.remove());
+    d.querySelectorAll('.motor-calc-summary').forEach(node=>node.remove());
   }
-  function innerWin(){
-    try{return frame.contentWindow}catch(e){return null}
-  }
-  function panelNumber(card,index){
-    return Number(card.dataset.panelIndex||card.dataset.calc||index+1)||index+1;
-  }
-  function loadState(){
-    try{return JSON.parse(localStorage.getItem(MOTOR_STORAGE_KEY)||'{}')||{}}catch(e){return{}}
-  }
-  function saveState(state){
-    try{localStorage.setItem(MOTOR_STORAGE_KEY,JSON.stringify(state))}catch(e){}
-  }
-  function clearAllMotorState(){
-    try{localStorage.removeItem(MOTOR_STORAGE_KEY)}catch(e){}
-  }
-  function blankRow(){
-    return {phase:'',voltage:'',hp:'',quantity:'1',factor:'4',customFactor:''};
-  }
+  function blankRow(){return {phase:'',voltage:'',hp:'',quantity:'1',factor:'4',customFactor:''}}
   function getPanelState(n){
     const state=loadState();
     const saved=state[String(n)];
     if(!saved)return {enabled:false,rows:[]};
-    return {
-      enabled:saved.enabled===true,
-      rows:Array.isArray(saved.rows)&&saved.rows.length?saved.rows:[blankRow()]
-    };
+    return {enabled:saved.enabled===true,rows:Array.isArray(saved.rows)&&saved.rows.length?saved.rows:[blankRow()]};
   }
-  function setPanelState(n,panelState){
-    const state=loadState();
-    state[String(n)]=panelState;
-    saveState(state);
-  }
-  function removePanelState(n){
-    const state=loadState();
-    delete state[String(n)];
-    saveState(state);
-  }
+  function setPanelState(n,panelState){const state=loadState();state[String(n)]=panelState;saveState(state)}
+  function removePanelState(n){const state=loadState();delete state[String(n)];saveState(state)}
   function flcTable(phase){return phase==='single'?singlePhaseFLC:phase==='three'?threePhaseFLC:null}
   function flcValue(row){
     const table=flcTable(row.phase);
@@ -101,19 +82,14 @@
     return Number.isFinite(v)&&v>0?v:null;
   }
   function rowContribution(row){
-    const flc=flcValue(row);
-    const qty=Number(row.quantity);
-    const factor=factorValue(row);
+    const flc=flcValue(row),qty=Number(row.quantity),factor=factorValue(row);
     if(!Number.isFinite(flc)||!Number.isFinite(qty)||qty<1||!Number.isFinite(factor))return null;
     return flc*qty*factor;
   }
   function panelContribution(n){
     const p=getPanelState(n);
     if(!p.enabled)return 0;
-    return p.rows.reduce((sum,row)=>{
-      const contribution=rowContribution(row);
-      return sum+(Number.isFinite(contribution)?contribution:0);
-    },0);
+    return p.rows.reduce((sum,row)=>{const c=rowContribution(row);return sum+(Number.isFinite(c)?c:0)},0);
   }
   function formatNumber(value,digits){
     return Number.isFinite(value)?value.toLocaleString(undefined,{maximumFractionDigits:digits,minimumFractionDigits:digits}):'—';
@@ -128,9 +104,8 @@
     return '<option value="">Select horsepower</option>'+values.map(v=>`<option value="${v}"${v===row.hp?' selected':''}>${hpLabels[v]||v} HP</option>`).join('');
   }
   function motorStyles(d){
-    let style=d.getElementById('loadCalcProMotorStyles');
-    if(style)return;
-    style=d.createElement('style');
+    if(d.getElementById('loadCalcProMotorStyles'))return;
+    const style=d.createElement('style');
     style.id='loadCalcProMotorStyles';
     style.textContent=`
       @media screen{
@@ -169,12 +144,7 @@
       customFactor:rowEl.querySelector('[data-motor-field="customFactor"]')?.value||''
     };
   }
-  function readPanelFromDom(panel){
-    return {
-      enabled:true,
-      rows:Array.from(panel.querySelectorAll('.motor-row')).map(readRowFromDom)
-    };
-  }
+  function readPanelFromDom(panel){return {enabled:true,rows:Array.from(panel.querySelectorAll('.motor-row')).map(readRowFromDom)}}
   function updateRowDisplays(rowEl,row){
     const voltage=rowEl.querySelector('[data-motor-field="voltage"]');
     const hp=rowEl.querySelector('[data-motor-field="hp"]');
@@ -182,8 +152,7 @@
     if(voltage)voltage.innerHTML=voltageOptions(row.phase,row.voltage);
     if(hp)hp.innerHTML=hpOptions(row);
     if(custom)custom.style.display=row.factor==='custom'?'block':'none';
-    const flc=flcValue(row);
-    const contribution=rowContribution(row);
+    const flc=flcValue(row),contribution=rowContribution(row);
     const flcNode=rowEl.querySelector('[data-motor-readout="flc"]');
     const contributionNode=rowEl.querySelector('[data-motor-readout="contribution"]');
     if(flcNode)flcNode.textContent=Number.isFinite(flc)?formatNumber(flc,1)+' A':'—';
@@ -211,9 +180,8 @@
     return rowEl;
   }
   function updatePanelTotal(panel,n){
-    const total=panelContribution(n);
     const node=panel.querySelector('.motor-total');
-    if(node)node.textContent='Total Motor Contribution: '+formatNumber(total,0)+' A';
+    if(node)node.textContent='Total Motor Contribution: '+formatNumber(panelContribution(n),0)+' A';
   }
   function renderMotorPanel(card,n,panelState){
     const d=innerDoc();
@@ -257,8 +225,8 @@
     wrap.appendChild(panel);
     updatePanelTotal(panel,n);
 
-    panel.addEventListener('change',event=>handleMotorInput(event,card,panel,n));
-    panel.addEventListener('input',event=>handleMotorInput(event,card,panel,n));
+    panel.addEventListener('change',event=>handleMotorInput(event,panel,n));
+    panel.addEventListener('input',event=>handleMotorInput(event,panel,n));
     panel.querySelector('.motor-add-row').addEventListener('click',()=>{
       const current=readPanelFromDom(panel);
       current.rows.push(blankRow());
@@ -283,20 +251,12 @@
       resizeParent();
     }));
   }
-  function handleMotorInput(event,card,panel,n){
+  function handleMotorInput(event,panel,n){
     const rowEl=event.target.closest('.motor-row');
     if(!rowEl)return;
     let row=readRowFromDom(rowEl);
-    if(event.target.matches('[data-motor-field="phase"]')){
-      row.voltage='';row.hp='';
-      const voltage=rowEl.querySelector('[data-motor-field="voltage"]');
-      if(voltage)voltage.value='';
-    }
-    if(event.target.matches('[data-motor-field="voltage"]')){
-      row.hp='';
-      const hp=rowEl.querySelector('[data-motor-field="hp"]');
-      if(hp)hp.value='';
-    }
+    if(event.target.matches('[data-motor-field="phase"]')){row.voltage='';row.hp=''}
+    if(event.target.matches('[data-motor-field="voltage"]'))row.hp='';
     updateRowDisplays(rowEl,row);
     const current=readPanelFromDom(panel);
     setPanelState(n,current);
@@ -306,20 +266,16 @@
   }
   function recalculate(n){
     const w=innerWin();
-    if(w&&typeof w.calculate==='function'){
-      try{w.calculate(n)}catch(e){}
-    }
+    if(w&&typeof w.calculate==='function'){try{w.calculate(n)}catch(e){}}
   }
-  function resizeParent(){
-    try{window.dispatchEvent(new Event('resize'))}catch(e){}
-  }
+  function resizeParent(){try{window.dispatchEvent(new Event('resize'))}catch(e){}}
   function applyMotorToCalculatedResult(w,d,n){
-    const result=d.getElementById('aicResult'+(n===1?'':n));
-    const details=d.getElementById('calcDetails'+(n===1?'':n));
+    const suffix=n===1?'':n;
+    const result=d.getElementById('aicResult'+suffix);
+    const details=d.getElementById('calcDetails'+suffix);
     if(!result||!details)return;
     details.querySelector('.motor-calc-summary')?.remove();
-    const baseText=String(result.textContent||'').replace(/,/g,'').trim();
-    const base=Number(baseText);
+    const base=Number(String(result.textContent||'').replace(/,/g,'').trim());
     if(!Number.isFinite(base))return;
     const contribution=panelContribution(n);
     const total=base+contribution;
@@ -335,7 +291,7 @@
       if(next){
         next.dataset.userEdited='false';
         next.value=Math.round(total).toString();
-        if(typeof w.calculate==='function')w.calculate(2);
+        setTimeout(()=>{try{if(typeof w.calculate==='function')w.calculate(2)}catch(e){}},0);
       }
     }
   }
@@ -347,10 +303,7 @@
     w.calculate=function(n){
       if(active)return original.call(w,n);
       active=true;
-      try{
-        original.call(w,n);
-        applyMotorToCalculatedResult(w,d,n);
-      }finally{active=false}
+      try{original.call(w,n);applyMotorToCalculatedResult(w,d,n)}finally{active=false}
     };
     w.__loadCalcProMotorWrapped=true;
   }
@@ -360,9 +313,10 @@
     const state=loadState();
     Array.from(d.querySelectorAll('#calculationsContainer > .card')).forEach((card,index)=>{
       const n=panelNumber(card,index);
-      const saved=state[String(n)];
-      const panelState=saved?getPanelState(n):{enabled:false,rows:[]};
-      if(!card.querySelector('.motor-contribution-wrap'))renderMotorPanel(card,n,panelState);
+      if(!card.querySelector('.motor-contribution-wrap')){
+        const saved=state[String(n)];
+        renderMotorPanel(card,n,saved?getPanelState(n):{enabled:false,rows:[]});
+      }
     });
   }
   function installResetHooks(){
@@ -377,6 +331,7 @@
           const n=panelNumber(card,index);
           setTimeout(()=>{
             removePanelState(n);
+            card.querySelector('.motor-contribution-wrap')?.remove();
             renderMotorPanel(card,n,{enabled:false,rows:[]});
             recalculate(n);
             resizeParent();
@@ -385,13 +340,17 @@
       }
       if(event.target.closest('#startNewBtn')){
         clearAllMotorState();
-        setTimeout(()=>{installMotorSections();recalculate(1);resizeParent()},0);
+        setTimeout(()=>{
+          removeMotorUi();
+          installMotorSections();
+          recalculate(1);
+          resizeParent();
+        },0);
       }
     },true);
   }
   function install(){
-    const d=innerDoc();
-    if(!d)return;
+    const d=innerDoc();if(!d)return;
     installCalculationWrapper();
     installMotorSections();
     installResetHooks();
@@ -409,13 +368,12 @@
     setTimeout(install,150);
     setTimeout(install,650);
     const d=innerDoc();
-    if(d){
-      d.addEventListener('click',()=>setTimeout(install,40),true);
-    }
+    if(d)d.addEventListener('click',()=>setTimeout(install,40),true);
   });
 
   document.getElementById('newCalculationBtn')?.addEventListener('click',()=>{
     clearAllMotorState();
+    removeMotorUi();
     setTimeout(install,40);
   },true);
 

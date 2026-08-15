@@ -66,3 +66,14 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNavigation,{once:true});else initNavigation();
 })();
+
+/* Load the coordinated Generator report/totals polish after the existing calculator hotfixes. */
+(function(){
+  'use strict';
+  if(document.querySelector('script[data-generator-report-polish]'))return;
+  const script=document.createElement('script');
+  script.src='report-polish.js';
+  script.defer=true;
+  script.dataset.generatorReportPolish='true';
+  document.head.appendChild(script);
+})();

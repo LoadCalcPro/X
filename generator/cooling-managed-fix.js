@@ -77,8 +77,22 @@
     const n=Number(String(el.textContent||'').replace(/[^0-9.-]/g,''));
     return Number.isFinite(n)?n:0;
   }
+  function inputNumber(id){
+    const el=document.getElementById(id);
+    const n=Number(el?el.value:0);
+    return Number.isFinite(n)?n:0;
+  }
   function textNumber(value){return Math.round(Number(value)||0).toLocaleString('en-US')}
-  function generalAppliance(){return{service:numberFrom('e8')+numberFrom('e31'),generator:numberFrom('f8')+numberFrom('f31')}}
+  function generalAppliance(){
+    const general=(Math.max(inputNumber('q5'),0)*3)+(Math.max(Math.floor(inputNumber('q6')),0)*1500)+(Math.max(Math.floor(inputNumber('q7')),0)*1500);
+    let serviceAppliances=0;
+    let generatorAppliances=0;
+    for(let row=10;row<=30;row++){
+      serviceAppliances+=numberFrom('e'+row);
+      generatorAppliances+=numberFrom('f'+row);
+    }
+    return{service:general+serviceAppliances,generator:general+generatorAppliances};
+  }
   function hvacContinuous(){return{service:numberFrom('e44')+numberFrom('e45'),generator:numberFrom('f44')+numberFrom('f45')}}
 
   function makeInlineTotal(id,label,serviceId,generatorId){

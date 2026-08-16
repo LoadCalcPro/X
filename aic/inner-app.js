@@ -196,7 +196,7 @@ function createPanel(n) {
       <label for="distance${n}">L = Distance to Panel</label>
       <input id="distance${n}" type="text" inputmode="decimal" placeholder="Enter distance to panel">
       <label for="volts${n}">E = Voltage</label>
-      <select id="volts${n}"><option value="">Select volts</option><option>208</option><option>240</option><option>480</option></select>
+      <select id="volts${n}"><option value="">Select volts</option><option>208</option><option>240</option><option>480</option><option>600</option></select>
       <label for="conductors${n}">N = Number of Conductors per Phase</label>
       <select id="conductors${n}"><option value="">Select number of conductors per phase</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
       <label for="phase${n}">Phase</label>

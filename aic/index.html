@@ -17,11 +17,18 @@
   <div class="actions">
     <button type="button" id="mainSiteBtn">Main Site</button>
     <button type="button" id="calculatorsBtn">Calculators</button>
-    <label class="print-control" for="outerPrintLayout">Print Options
-      <select id="outerPrintLayout" aria-label="Print options">
-        <option value="full" selected>Full Page</option><option value="side">Side by Side</option><option value="stacked">Stacked</option><option value="columns">Stacked Columns</option>
+    <div class="print-control" aria-label="Print options">
+      <select id="outerPrintType" aria-label="Print type">
+        <option value="branded" selected>Branded Report</option>
+        <option value="calculation">Calculation Only</option>
       </select>
-    </label>
+      <select id="outerPrintLayout" aria-label="Print layout">
+        <option value="full" selected>Full Page</option>
+        <option value="side">Side by Side</option>
+        <option value="stacked">Stacked</option>
+        <option value="columns">Stacked Columns</option>
+      </select>
+    </div>
     <button type="button" class="primary" id="printBtn">Print / PDF</button>
     <button type="button" id="newCalculationBtn">New Calculation</button>
   </div>

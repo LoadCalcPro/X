@@ -21,15 +21,26 @@ function observe(id){
   new MutationObserver(syncBottomResults).observe(el,{childList:true,characterData:true,subtree:true});
 }
 
+function trialDashboardUrl(){
+  const trialEmail=localStorage.getItem('loadcalcproTrialEmail');
+  const trialCode=localStorage.getItem('loadcalcproTrialCode');
+  return (trialEmail&&trialCode)?'../trial-dashboard.html':'../member-dashboard.html';
+}
+
 function installTrialNavigation(){
   const actions=document.querySelector('.header-actions');
   if(!actions)return;
-  const button=Array.from(actions.querySelectorAll('button')).find(b=>String(b.textContent||'').trim()==='Available Calculators');
+  const button=Array.from(actions.querySelectorAll('button')).find(b=>{
+    const text=String(b.textContent||'').trim().toLowerCase();
+    const onclick=String(b.getAttribute('onclick')||'').toLowerCase();
+    return text==='available calculators'||text==='calculators'||onclick.includes('member-dashboard.html');
+  });
   if(!button)return;
-  button.onclick=function(){
-    const trialEmail=localStorage.getItem('loadcalcproTrialEmail');
-    const trialCode=localStorage.getItem('loadcalcproTrialCode');
-    window.location.href=(trialEmail&&trialCode)?'../trial-dashboard.html':'../member-dashboard.html';
+  button.removeAttribute('onclick');
+  button.onclick=function(event){
+    if(event){event.preventDefault();event.stopPropagation();}
+    window.location.href=trialDashboardUrl();
+    return false;
   };
 }
 
@@ -82,6 +93,8 @@ function init(){
   document.addEventListener('change',function(){setTimeout(syncBottomResults,0)});
   document.addEventListener('click',function(){setTimeout(syncBottomResults,0)});
   installTrialNavigation();
+  setTimeout(installTrialNavigation,100);
+  setTimeout(installTrialNavigation,500);
   installPrintControlStyles();
   installPrintControls();
   loadPrintRenderer();

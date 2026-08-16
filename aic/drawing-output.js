@@ -53,6 +53,10 @@
     style.textContent=`
       @media print{
         .drawing-calculation-title{display:block!important;margin:0 0 7px!important;padding:0 0 5px!important;border-bottom:1px solid #777!important;font:800 11px/1.2 Arial,Helvetica,sans-serif!important;letter-spacing:.02em!important;text-transform:uppercase!important;color:#111!important}
+        .print-page-header{display:block!important;border-bottom:1px solid #555!important;padding:0 0 8px!important;margin:0 0 10px!important}
+        .print-page-brand{font:800 18px/1.1 Arial,Helvetica,sans-serif!important;color:#173b7a!important;margin:0 0 3px!important}
+        .print-page-brand .brand-pro,.print-page-brand .brand-x{color:#0f766e!important}
+        .print-page-title{font:800 12px/1.2 Arial,Helvetica,sans-serif!important;color:#111!important;margin:0!important}
         body.aic-calculation-only .print-page-header,
         body.aic-calculation-only .print-report-header,
         .print-page.calculation-only .print-page-header{display:none!important}
@@ -69,6 +73,12 @@
   }
 
   function identifyCalculationBlocks(d,generic){
+    d.querySelectorAll('#printPages .print-page-header').forEach(header=>{
+      const brand=header.querySelector('.print-page-brand');
+      const title=header.querySelector('.print-page-title');
+      if(brand)brand.innerHTML='<span>LoadCalc</span><span class="brand-pro">Pro</span> <span class="brand-x">X</span>';
+      if(title)title.textContent='Available Fault Current Calculator';
+    });
     d.querySelectorAll('#printPages .print-report-card').forEach(card=>{
       const report=card.querySelector('.clean-print-report');
       if(report&&!report.querySelector('.drawing-calculation-title')){

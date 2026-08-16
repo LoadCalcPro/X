@@ -3,20 +3,13 @@
 
   const frame=document.getElementById('aicFrame');
   const layout=document.getElementById('outerPrintLayout');
+  const printType=document.getElementById('outerPrintType');
   const STORAGE_KEY='loadCalcProAicCalculatorExpandablePanels';
-  if(!frame||!layout)return;
+  if(!frame||!layout||!printType)return;
 
   function innerDoc(){try{return frame.contentDocument||frame.contentWindow.document}catch(e){return null}}
   function innerWin(){try{return frame.contentWindow}catch(e){return null}}
   function cards(){const d=innerDoc();return d?Array.from(d.querySelectorAll('#calculationsContainer > .card')):[]}
-
-  function ensureCalculationOnlyOption(){
-    if(Array.from(layout.options).some(o=>o.value==='calculation'))return;
-    const option=document.createElement('option');
-    option.value='calculation';
-    option.textContent='Calculation Only';
-    layout.appendChild(option);
-  }
 
   function savedPanelCount(){
     try{
@@ -60,7 +53,10 @@
     style.textContent=`
       @media print{
         .drawing-calculation-title{display:block!important;margin:0 0 7px!important;padding:0 0 5px!important;border-bottom:1px solid #777!important;font:800 11px/1.2 Arial,Helvetica,sans-serif!important;letter-spacing:.02em!important;text-transform:uppercase!important;color:#111!important}
+        body.aic-calculation-only .print-page-header,
+        body.aic-calculation-only .print-report-header,
         .print-page.calculation-only .print-page-header{display:none!important}
+        body.aic-calculation-only .print-page{padding-top:0!important}
         .print-page.calculation-only .print-report-card{border:1px solid #777!important}
       }
     `;
@@ -77,28 +73,40 @@
       }
     });
     d.querySelectorAll('#printPages .print-page').forEach(page=>page.classList.toggle('calculation-only',generic));
+    d.body.classList.toggle('aic-calculation-only',generic);
+  }
+
+  function clearPrintMode(){
+    const d=innerDoc();
+    if(!d)return;
+    d.body.classList.remove('aic-calculation-only');
   }
 
   function installDrawingPrint(){
     const d=innerDoc(),w=innerWin();
     if(!d||!w)return;
     installPrintStyles(d);
-    if(w.__drawingReadyAicPrintInstalled)return;
-    w.__drawingReadyAicPrintInstalled=true;
-    const original=w.preparePrint;
-    w.preparePrint=function(){
-      const selected=layout.value||'full';
-      const generic=selected==='calculation';
+    if(w.preparePrint&&w.preparePrint.__drawingReadyAic)return;
+
+    const wrapped=function(){
+      const mode=layout.value||'full';
+      const generic=printType.value==='calculation';
       if(typeof w.buildCleanPrintReports==='function'&&typeof w.createPrintPages==='function'){
         w.buildCleanPrintReports();
-        const count=w.createPrintPages(generic?'full':selected);
+        const count=w.createPrintPages(mode);
         if(!count){w.alert('Enter calculation information before printing.');return}
         identifyCalculationBlocks(d,generic);
         w.print();
         return;
       }
-      if(typeof original==='function')return original.apply(w,arguments);
     };
+    wrapped.__drawingReadyAic=true;
+    w.preparePrint=wrapped;
+
+    if(!w.__drawingReadyAfterPrint){
+      w.__drawingReadyAfterPrint=true;
+      w.addEventListener('afterprint',clearPrintMode);
+    }
   }
 
   function installRemovalCollapse(){
@@ -118,7 +126,6 @@
   }
 
   function install(){
-    ensureCalculationOnlyOption();
     ensureOneInitialPanel();
     installDrawingPrint();
     installRemovalCollapse();
@@ -129,8 +136,9 @@
     install();
     setTimeout(install,150);
     setTimeout(install,700);
+    setTimeout(install,1000);
   });
   layout.addEventListener('change',()=>setTimeout(installDrawingPrint,0));
-  ensureCalculationOnlyOption();
+  printType.addEventListener('change',()=>setTimeout(installDrawingPrint,0));
   try{if(innerDoc()?.readyState==='complete')install()}catch(e){}
 })();

@@ -46,13 +46,11 @@ function installStyle(){
   .print-table .print-section-row td{background:#e8edf3!important;color:#222!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.02em!important;text-align:left!important}
   .print-table .subtotal-row td,.print-table .demand-total-row td,.print-table .hvac-continuous-total-row td{background:#f7f7f7!important;color:#222!important;font-weight:800!important}
   .print-table .demand-breakdown-row td{background:#fff!important;color:#222!important;font-weight:400!important}
-  .print-table .report-info-row td{background:#fff!important;color:#222!important;font-weight:400!important;border-top:1px solid #94a3b8!important}
-  .print-table .report-info-row .service-voltage-cell{padding:2px 4px!important;text-align:left!important}
-  .print-table .report-info-row .managed-quantity-cell{padding:2px 4px!important;text-align:left!important}
-  .print-table .report-info-row .managed-pair{display:flex!important;width:100%!important;align-items:baseline!important;justify-content:space-between!important;gap:6px!important;white-space:nowrap!important}
+  .print-table .report-info-row td{background:#fff!important;color:#222!important;font-weight:400!important;border-top:1px solid #94a3b8!important;width:50%!important;text-align:left!important;padding:2px 4px!important}
+  .print-table .report-info-row .managed-pair{display:flex!important;width:100%!important;align-items:baseline!important;justify-content:flex-start!important;gap:6px!important;white-space:nowrap!important}
   .print-table .report-info-row .info-label{font-weight:800!important;color:#222!important}
   .print-table .report-info-row .info-value{font-weight:400!important;color:#222!important}
-  .print-table .report-info-row .managed-value{text-align:right!important;margin-left:auto!important}
+  .print-table .report-info-row .managed-value{text-align:left!important;margin-left:0!important}
   .print-table .final-total-row td,.print-table .final-amps-row td{background:#fff!important;color:#222!important;border-top:1.5px solid #4b5563!important;font-weight:900!important}
   .print-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
 }`;document.head.appendChild(style)
@@ -86,7 +84,7 @@ window.updatePrintRows=function(data){
   if(data.largestMotor&&Number(data.largestMotor.additionalVA)>0)continuousRows+=loadRow((data.largestMotor.type||'Largest Motor')+' — Additional 25%','',data.largestMotor.additionalVA,data.largestMotor.additionalVA);
   if(continuousRows)body+=sectionRow('Continuous Loads')+continuousRows;
   body+=totalRow('Total HVAC + Continuous Load',hvacContinuousService,hvacContinuousGenerator,'hvac-continuous-total-row');
-  body+='<tr class="report-info-row"><td class="service-voltage-cell"><span class="info-label">Service Voltage:</span> <span class="info-value">'+num(data.voltage)+' V</span></td><td></td><td></td><td class="managed-quantity-cell"><div class="managed-pair"><span class="info-label">Managed Quantity:</span><span class="info-value managed-value">'+num(data.managedLoadCount)+'</span></div></td></tr>';
+  body+='<tr class="report-info-row"><td colspan="2" class="service-voltage-cell"><span class="info-label">Service Voltage:</span> <span class="info-value">'+num(data.voltage)+' V</span></td><td colspan="2" class="managed-quantity-cell"><div class="managed-pair"><span class="info-label">Managed Quantity:</span><span class="info-value managed-value">'+num(data.managedLoadCount)+'</span></div></td></tr>';
   body+=totalRow('Total VA',data.serviceTotalVA,data.generatorTotalVA,'final-total-row');
   body+='<tr class="final-amps-row"><td><strong>Calculated Amps</strong></td><td></td><td class="number"><strong>'+Math.ceil(Number(data.serviceCurrent)||0)+' A</strong></td><td class="number"><strong>'+Math.ceil(Number(data.generatorCurrent)||0)+' A</strong></td></tr>';
 

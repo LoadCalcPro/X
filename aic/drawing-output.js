@@ -62,6 +62,12 @@
     `;
   }
 
+  function installMotorRowControls(d){
+    let style=d.getElementById('aicMotorRowControlStyles');
+    if(!style){style=d.createElement('style');style.id='aicMotorRowControlStyles';d.head.appendChild(style)}
+    style.textContent='@media screen{.motor-rows .motor-row:first-child .motor-remove-row{display:none!important}.motor-rows .motor-row:first-child .motor-row-actions{display:none!important}}';
+  }
+
   function identifyCalculationBlocks(d,generic){
     d.querySelectorAll('#printPages .print-report-card').forEach(card=>{
       const report=card.querySelector('.clean-print-report');
@@ -126,7 +132,10 @@
   }
 
   function install(){
+    const d=innerDoc();
+    if(!d)return;
     ensureOneInitialPanel();
+    installMotorRowControls(d);
     installDrawingPrint();
     installRemovalCollapse();
     resizeTight(false);

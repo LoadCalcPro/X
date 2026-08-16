@@ -114,18 +114,8 @@
   }
   function hpOptions(row){
     const table=flcTable(row.phase);
-    const values=table&&table[row.voltage]?Object.keys(table[row.voltage]):[];
+    const values=table&&table[row.voltage]?Object.keys(table[row.voltage]).sort((a,b)=>Number(a)-Number(b)):[];
     return '<option value="">Select horsepower</option>'+values.map(v=>`<option value="${v}"${v===row.hp?' selected':''}>${hpLabels[v]||v} HP</option>`).join('');
-  }
-  function install600VoltageOptions(d){
-    d.querySelectorAll('select[id^="volts"]').forEach(select=>{
-      if(!Array.from(select.options).some(option=>option.value==='600')){
-        const option=d.createElement('option');
-        option.value='600';
-        option.textContent='600';
-        select.appendChild(option);
-      }
-    });
   }
   function motorStyles(d){
     if(d.getElementById('loadCalcProMotorStyles'))return;
@@ -135,16 +125,16 @@
       @media screen{
         .motor-contribution-wrap{margin-top:14px;padding-top:13px;border-top:1px solid #dbe3ec}
         .motor-add-toggle{background:#fff!important;color:#1e3a8a!important;border:1px solid #1e3a8a!important;padding:9px 13px!important}
-        .motor-contribution-panel{margin-top:10px;padding:14px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc}
-        .motor-panel-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+        .motor-contribution-panel{margin-top:10px;padding:14px;border:1px solid #d1dbe7;border-radius:12px;background:#fff}
+        .motor-panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}
         .motor-panel-title{font-size:15px;font-weight:800;color:#17365d}
-        .motor-panel-note{margin-top:3px;color:#64748b;font-size:12px;font-weight:500}
+        .motor-panel-note{max-width:760px;margin-top:4px;color:#64748b;font-size:12px;line-height:1.45;font-weight:500}
         .motor-row{padding:12px 0;border-top:1px solid #e2e8f0}
         .motor-row:first-of-type{border-top:0;padding-top:0}
         .motor-row-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;align-items:end}
         .motor-field label{display:block;margin:0 0 5px;color:#475569;font-size:12px;font-weight:700}
         .motor-field input,.motor-field select{min-height:40px;padding:7px 8px;font-size:13px}
-        .motor-readout{min-height:40px;display:flex;align-items:center;padding:7px 8px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font-size:13px;font-weight:700;color:#0f172a}
+        .motor-readout{min-height:40px;display:flex;align-items:center;padding:7px 8px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;font-size:13px;font-weight:700;color:#0f172a}
         .motor-custom-factor{margin-top:6px}
         .motor-row-actions{display:flex;justify-content:flex-end;margin-top:8px}
         .motor-row-actions button,.motor-footer button,.motor-panel-header button{min-height:36px;padding:7px 10px;font-size:12px;border-radius:8px}
@@ -198,7 +188,7 @@
         <div class="motor-field"><label>Voltage</label><select data-motor-field="voltage"></select></div>
         <div class="motor-field"><label>Horsepower</label><select data-motor-field="hp"></select></div>
         <div class="motor-field"><label>Quantity</label><input data-motor-field="quantity" type="number" min="1" step="1" value="${row.quantity||'1'}"></div>
-        <div class="motor-field"><label>Contribution Factor</label><select data-motor-field="factor"><option value="4"${row.factor==='4'?' selected':''}>4 × FLC</option><option value="5"${row.factor==='5'?' selected':''}>5 × FLC</option><option value="6"${row.factor==='6'?' selected':''}>6 × FLC</option><option value="custom"${row.factor==='custom'?' selected':''}>Custom</option></select><input class="motor-custom-factor" data-motor-field="customFactor" type="number" min="0.1" step="0.1" placeholder="Custom factor" value="${row.customFactor||''}"></div>
+        <div class="motor-field"><label>Estimated Contribution Factor</label><select data-motor-field="factor"><option value="4"${row.factor==='4'?' selected':''}>4 × FLC</option><option value="5"${row.factor==='5'?' selected':''}>5 × FLC</option><option value="6"${row.factor==='6'?' selected':''}>6 × FLC</option><option value="custom"${row.factor==='custom'?' selected':''}>Custom</option></select><input class="motor-custom-factor" data-motor-field="customFactor" type="number" min="0.1" step="0.1" placeholder="Custom factor" value="${row.customFactor||''}"></div>
         <div class="motor-field"><label>NEC Table FLC</label><div class="motor-readout" data-motor-readout="flc">—</div></div>
       </div>
       <div class="motor-row-grid" style="margin-top:9px">
@@ -243,7 +233,7 @@
     panel.className='motor-contribution-panel';
     panel.innerHTML=`
       <div class="motor-panel-header">
-        <div><div class="motor-panel-title">Motor Contribution</div><div class="motor-panel-note">FLC is looked up from NEC Table 430.248 (single phase) or the induction-motor portion of Table 430.250 (three phase).</div></div>
+        <div><div class="motor-panel-title">Motor Contribution</div><div class="motor-panel-note">FLC is looked up from NEC Table 430.248 (single phase) or the induction-motor portion of Table 430.250 (three phase). The contribution factor is an estimate; use actual motor/system short-circuit characteristics when available. Do not model a non-regenerative VFD-fed motor as a conventional induction-motor contribution unless the equipment data supports it.</div></div>
         <button type="button" class="secondary motor-remove-section">Remove Section</button>
       </div>
       <div class="motor-rows"></div>
@@ -317,7 +307,7 @@
       const motorRows=motorState.rows.map((row,index)=>{
         const flc=flcValue(row),factor=factorValue(row),qty=Number(row.quantity),rowTotal=rowContribution(row);
         if(!Number.isFinite(flc)||!Number.isFinite(factor)||!Number.isFinite(qty)||!Number.isFinite(rowTotal))return '';
-        return `<div class="motor-work-block"><div class="motor-work-title">Motor ${motorState.rows.length>1?index+1:''}</div><div class="motor-work-line"><span class="motor-work-label">Formula</span><span class="motor-work-value">Motor Contribution = NEC Table FLC × Quantity × Contribution Factor</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">${formatNumber(flc,1)} × ${qty} × ${formatNumber(factor,1)} = ${formatNumber(rowTotal,0)} A</span></div></div>`;
+        return `<div class="motor-work-block"><div class="motor-work-title">Motor ${motorState.rows.length>1?index+1:''}</div><div class="motor-work-line"><span class="motor-work-label">Formula</span><span class="motor-work-value">Motor Contribution = NEC Table FLC × Quantity × Estimated Contribution Factor</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">${formatNumber(flc,1)} × ${qty} × ${formatNumber(factor,1)} = ${formatNumber(rowTotal,0)} A</span></div></div>`;
       }).join('');
       motorHtml=`${motorRows}<div class="motor-work-line motor-total-work"><span class="motor-work-label">Formula</span><span class="motor-work-value">Total AIC = Available Fault Current + Motor Contribution</span></div><div class="motor-work-line"><span class="motor-work-label">Calculation</span><span class="motor-work-value">${formatNumber(baseAic,0)} + ${formatNumber(contribution,0)} = ${formatNumber(total,0)} A</span></div>`;
     }
@@ -406,7 +396,6 @@
   }
   function install(){
     const d=innerDoc();if(!d)return;
-    install600VoltageOptions(d);
     installCalculationWrapper();
     installMotorSections();
     installResetHooks();

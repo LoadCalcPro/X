@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Trial Calculators | LoadCalcPro X</title>
+<style>
+:root{--navy:#071b47;--blue:#1e3a8a;--teal:#0f766e;--page:#eef3f7;--card:#fff;--text:#182433;--muted:#667487;--border:#d9e1e8;--shadow:0 18px 48px rgba(16,35,63,.14)}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:linear-gradient(145deg,#f7fafc 0%,var(--page) 100%)}header{background:var(--navy);color:#fff}.header-inner{width:min(1120px,calc(100% - 36px));min-height:92px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-size:27px;font-weight:900}.brand span{color:#5eead4}.header-link{color:#fff;text-decoration:none;font-weight:800;border:1px solid rgba(255,255,255,.35);border-radius:9px;padding:11px 16px}main{width:min(980px,calc(100% - 32px));margin:44px auto}.heading{text-align:center;margin-bottom:28px}.heading h1{margin:0 0 8px;color:var(--navy);font-size:31px}.heading p{margin:0;color:var(--muted)}.status{max-width:760px;margin:0 auto 24px;padding:14px 16px;border:1px solid #a7f3d0;border-radius:10px;background:#ecfdf5;color:#065f46;text-align:center;line-height:1.5}.status.error{border-color:#fecaca;background:#fef2f2;color:#991b1b}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card{min-height:290px;display:flex;flex-direction:column;padding:26px;background:#fff;border:1px solid var(--border);border-radius:15px;box-shadow:0 12px 30px rgba(16,35,63,.09)}.icon{width:48px;height:48px;border-radius:11px;display:grid;place-items:center;background:#e9f6ef;color:var(--teal);font-size:22px;font-weight:900}.card h2{margin:18px 0 9px;color:var(--navy);font-size:21px}.card p{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.5;flex:1}.open{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:8px;background:var(--blue);color:#fff;text-decoration:none;font-weight:800}.actions{text-align:center;margin-top:26px}.actions button,.actions a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;margin:4px;border:1px solid #aeb9c4;border-radius:8px;background:#fff;color:var(--navy);font-weight:700;text-decoration:none;cursor:pointer}.hidden{display:none!important}@media(max-width:760px){.grid{grid-template-columns:1fr}.card{min-height:0}.header-inner{padding:16px 0;flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="header-inner"><div class="brand">⚡ LoadCalc<span>Pro X</span></div><a class="header-link" href="index.html">Main Site</a></div></header>
+<main>
+  <div class="heading"><h1>24-Hour Trial Calculators</h1><p>Use your promotional trial until the expiration time shown below.</p></div>
+  <div id="status" class="status">Checking trial access…</div>
+  <section id="calculatorGrid" class="grid hidden">
+    <article class="card"><div class="icon">G</div><h2>Optional Method Generator Calculator</h2><p>Prepare optional-method and generator-load calculations and print a professional report.</p><a class="open" href="generator/">Open Generator Calculator</a></article>
+    <article class="card"><div class="icon">A</div><h2>Available Fault Current Calculator</h2><p>Calculate available fault current at the service and downstream panel locations.</p><a class="open" href="aic/">Open Available Fault Current Calculator</a></article>
+  </section>
+  <div class="actions"><a href="trial.html">Enter Different Trial Code</a><button id="exitTrial" type="button">Exit Trial</button></div>
+</main>
+<script>
+(function(){
+  'use strict';
+  const API='https://loadcalcpro-hcml-api.onrender.com/api/promo/redeem';
+  const EMAIL_KEY='loadcalcproTrialEmail';
+  const CODE_KEY='loadcalcproTrialCode';
+  const EXPIRES_KEY='loadcalcproTrialExpires';
+  const email=localStorage.getItem(EMAIL_KEY)||'';
+  const code=localStorage.getItem(CODE_KEY)||'';
+  const status=document.getElementById('status');
+  const grid=document.getElementById('calculatorGrid');
+  function clearTrial(){localStorage.removeItem(EMAIL_KEY);localStorage.removeItem(CODE_KEY);localStorage.removeItem(EXPIRES_KEY)}
+  document.getElementById('exitTrial').addEventListener('click',function(){clearTrial();location.href='index.html'});
+  if(!email||!code){status.className='status error';status.textContent='Enter your email address and promotional code to access your trial.';setTimeout(function(){location.href='trial.html'},1200);return}
+  fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,code:code})})
+    .then(async function(response){const data=await response.json().catch(function(){return{}});if(!response.ok||data.active!==true)throw new Error(data.message||'Trial access is not active.');return data})
+    .then(function(data){if(data.expires_at)localStorage.setItem(EXPIRES_KEY,data.expires_at);const expires=data.expires_at?new Date(data.expires_at).toLocaleString():'';status.textContent='Trial active for '+email+(expires?' — expires '+expires+'.':'.');grid.classList.remove('hidden')})
+    .catch(function(error){clearTrial();status.className='status error';status.textContent=error.message||'Trial access is not active.';grid.classList.add('hidden')});
+})();
+</script>
+</body>
+</html>

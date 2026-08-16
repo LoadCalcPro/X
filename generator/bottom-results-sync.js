@@ -21,6 +21,18 @@ function observe(id){
   new MutationObserver(syncBottomResults).observe(el,{childList:true,characterData:true,subtree:true});
 }
 
+function installTrialNavigation(){
+  const actions=document.querySelector('.header-actions');
+  if(!actions)return;
+  const button=Array.from(actions.querySelectorAll('button')).find(b=>String(b.textContent||'').trim()==='Available Calculators');
+  if(!button)return;
+  button.onclick=function(){
+    const trialEmail=localStorage.getItem('loadcalcproTrialEmail');
+    const trialCode=localStorage.getItem('loadcalcproTrialCode');
+    window.location.href=(trialEmail&&trialCode)?'../trial-dashboard.html':'../member-dashboard.html';
+  };
+}
+
 function installPrintControlStyles(){
   if(document.getElementById('generatorPrintControlStyles'))return;
   const style=document.createElement('style');
@@ -69,6 +81,7 @@ function init(){
   document.addEventListener('input',function(){setTimeout(syncBottomResults,0)});
   document.addEventListener('change',function(){setTimeout(syncBottomResults,0)});
   document.addEventListener('click',function(){setTimeout(syncBottomResults,0)});
+  installTrialNavigation();
   installPrintControlStyles();
   installPrintControls();
   loadPrintRenderer();

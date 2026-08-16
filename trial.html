@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Try LoadCalcPro X</title>
+<style>
+:root{--navy:#071b47;--blue:#1e3a8a;--teal:#0f766e;--page:#f3f4f6;--line:#d1dbe7;--text:#111827;--muted:#64748b}*{box-sizing:border-box}body{margin:0;background:var(--page);font-family:Arial,Helvetica,sans-serif;color:var(--text)}.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}.card{width:min(560px,100%);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 44px rgba(15,23,42,.12);overflow:hidden}.header{background:var(--navy);color:#fff;padding:24px 28px}.brand{font-size:27px;font-weight:900;letter-spacing:-.03em}.brand .main{color:#fff}.brand .accent{color:#5eead4}.header p{margin:8px 0 0;color:#dbeafe;font-size:14px;line-height:1.5}.content{padding:28px}.content h1{margin:0 0 8px;color:var(--blue);font-size:24px}.intro{margin:0 0 22px;color:#475569;line-height:1.55}.field{margin-bottom:15px}.field label{display:block;margin:0 0 6px;font-size:13px;font-weight:800;color:#334155}.field input{width:100%;min-height:46px;border:1px solid #b8c6d8;border-radius:9px;padding:10px 12px;font-size:16px}.field input:focus{outline:2px solid #9cc9ee;border-color:#2f75b5}.button{width:100%;min-height:48px;border:1px solid #2dd4bf;border-radius:9px;background:var(--teal);color:#fff;font-size:15px;font-weight:800;cursor:pointer}.button:disabled{opacity:.55;cursor:wait}.note{margin:14px 0 0;color:var(--muted);font-size:12px;line-height:1.45}.message{display:none;margin:18px 0 0;padding:14px;border-radius:9px;font-size:14px;line-height:1.5}.message.show{display:block}.message.success{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}.message.error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}.actions{display:none;margin-top:14px;gap:10px}.actions.show{display:grid;grid-template-columns:1fr 1fr}.actions a{text-align:center;text-decoration:none;border:1px solid var(--blue);border-radius:8px;padding:10px;font-weight:800;font-size:13px}.actions .primary{background:var(--blue);color:#fff}.actions .secondary{background:#fff;color:var(--blue)}@media(max-width:520px){.page{padding:14px}.header,.content{padding:22px}.actions.show{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <main class="card">
+    <div class="header">
+      <div class="brand"><span class="main">LoadCalc</span><span class="accent">Pro X</span></div>
+      <p>Professional electrical calculation tools for plan review, design, and field work.</p>
+    </div>
+    <div class="content">
+      <h1>Activate Your 24-Hour Trial</h1>
+      <p class="intro">Enter your email address and promotional code to try both the Generator Optional Method Calculator and the Available Fault Current Calculator.</p>
+      <form id="trialForm">
+        <div class="field"><label for="email">Email Address</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+        <div class="field"><label for="code">Promotional Code</label><input id="code" name="code" type="text" autocomplete="off" autocapitalize="characters" required></div>
+        <button class="button" id="activateBtn" type="submit">Activate 24-Hour Trial</button>
+      </form>
+      <div id="message" class="message" role="status" aria-live="polite"></div>
+      <div id="actions" class="actions"><a class="primary" href="member-dashboard.html">Go to Calculators</a><a class="secondary" href="login.html">Sign In</a></div>
+      <p class="note">One promotional trial per email address for each campaign. Trial access begins when the code is first redeemed and ends automatically at the expiration time shown after activation.</p>
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  'use strict';
+  const API='https://loadcalcpro-hcml-api.onrender.com/api/promo/redeem';
+  const form=document.getElementById('trialForm');
+  const email=document.getElementById('email');
+  const code=document.getElementById('code');
+  const button=document.getElementById('activateBtn');
+  const message=document.getElementById('message');
+  const actions=document.getElementById('actions');
+  const params=new URLSearchParams(location.search);
+  const incoming=params.get('code');
+  if(incoming)code.value=incoming.toUpperCase();
+
+  function show(text,type){message.textContent=text;message.className='message show '+type}
+  form.addEventListener('submit',async function(event){
+    event.preventDefault();actions.classList.remove('show');button.disabled=true;button.textContent='Activating…';
+    try{
+      const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email.value,code:code.value})});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok&&!data.active)throw new Error(data.message||'Unable to activate the trial.');
+      const expires=data.expires_at?new Date(data.expires_at).toLocaleString():'';
+      const invite=data.invitation||{};
+      let text=data.message||'Your promotional trial is active.';
+      if(expires)text+=' Your access expires '+expires+'.';
+      if(invite.invited)text+=' Check your email for the LoadCalcPro password setup link, then sign in.';
+      else if(invite.reason==='auth_user_already_exists')text+=' Your existing LoadCalcPro sign-in will work for this trial.';
+      show(text,'success');actions.classList.add('show');
+    }catch(error){show(error.message||'Unable to activate the trial.','error')}
+    finally{button.disabled=false;button.textContent='Activate 24-Hour Trial'}
+  });
+})();
+</script>
+</body>
+</html>

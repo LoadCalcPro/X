@@ -13,6 +13,8 @@ function totalRow(label,service,generator,className){return '<tr class="'+(class
 function sectionRow(label){return '<tr class="print-section-row"><td colspan="4">'+esc(label)+'</td></tr>'}
 function applianceLabel(item){if(typeof applianceDescription==='function')return applianceDescription(item.row,item.label);return item.label||''}
 function hvacLabel(row){if(typeof window.getHVACRowLabel==='function')return window.getHVACRowLabel(row);return row===37||row===39?'Air Conditioning':'Heating'}
+function printType(){return document.getElementById('generatorPrintType')?.value||'branded'}
+function printLayout(){return document.getElementById('generatorPrintLayout')?.value||'full'}
 
 function installStyle(){
   if(document.getElementById('generatorPrintSingleSourceStyle'))return;
@@ -23,10 +25,13 @@ function installStyle(){
   .mobile-app,.bottom-results,.modal-backdrop{display:none!important}
   .print-report{display:block!important;width:100%!important;margin:0!important;padding:0!important;font-family:"Segoe UI",Arial,Helvetica,sans-serif!important;color:#222!important}
   .print-page{width:84%!important;margin:0 auto!important;padding:.14in!important;border:.6pt solid #cbd5e1!important;box-sizing:border-box!important;background:#fff!important}
+  .print-page.compact{width:58%!important;margin-left:.10in!important;margin-right:auto!important}
   .generator-print-heading{margin:0 0 7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
   .print-brand{display:block!important;margin:0 0 2px!important;font-size:12px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
   .print-brand-main{color:#17377f!important}.print-brand-accent{margin-left:2px!important;color:#0f766e!important}
   .print-title-text{display:block!important;color:#222!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
+  .print-page.calculation-only .print-brand{display:none!important}
+  .print-page.calculation-only .print-title-text{font-size:10px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.02em!important}
   .print-project{display:grid!important;grid-template-columns:1fr 1fr!important;gap:3px 12px!important;margin:0 0 5px!important;padding:0 0 5px!important;border-bottom:1px solid #c7cdd4!important;color:#222!important;font-size:9px!important;line-height:1.25!important}
   .print-table{width:100%!important;margin:0!important;border-collapse:collapse!important;table-layout:fixed!important}
   .print-table th,.print-table td{height:20px!important;padding:2px 4px!important;border:1px solid #cfd4da!important;color:#222!important;font-size:8.4px!important;line-height:1.15!important;vertical-align:middle!important}
@@ -34,6 +39,8 @@ function installStyle(){
   .print-table th:first-child,.print-table td:first-child{width:46%!important;text-align:left!important}
   .print-table th:nth-child(2),.print-table td:nth-child(2){width:12%!important;text-align:center!important}
   .print-table th:nth-child(3),.print-table td:nth-child(3),.print-table th:nth-child(4),.print-table td:nth-child(4){width:21%!important;text-align:right!important}
+  .print-page.compact .print-table th,.print-page.compact .print-table td{font-size:7.6px!important;padding:2px 3px!important}
+  .print-page.compact .print-project{font-size:8px!important;gap:2px 8px!important}
   .print-table .normal-load-row td{background:#fff!important;color:#222!important;font-weight:400!important}
   .print-table .normal-load-row td.number,.print-table .normal-load-row td.quantity{color:#222!important;font-weight:400!important}
   .print-table .print-section-row td{background:#e8edf3!important;color:#222!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.02em!important;text-align:left!important}
@@ -53,6 +60,8 @@ function installStyle(){
 
 window.updatePrintRows=function(data){
   const report=document.getElementById('printReport');if(!report)return;
+  const generic=printType()==='calculation';
+  const compact=printLayout()==='compact';
   const general=generalTotal(),appliances=applianceTotals(),combinedService=general+appliances.service,combinedGenerator=general+appliances.generator;
   const demandServiceCombined=(data.demandLoads&&Number.isFinite(data.demandLoads.serviceCombined))?data.demandLoads.serviceCombined:combinedService;
   const demandGeneratorCombined=(data.demandLoads&&Number.isFinite(data.demandLoads.generatorCombined))?data.demandLoads.generatorCombined:combinedGenerator;
@@ -80,8 +89,20 @@ window.updatePrintRows=function(data){
   body+='<tr class="report-info-row"><td class="service-voltage-cell"><span class="info-label">Service Voltage:</span> <span class="info-value">'+num(data.voltage)+' V</span></td><td></td><td></td><td class="managed-quantity-cell"><div class="managed-pair"><span class="info-label">Managed Quantity:</span><span class="info-value managed-value">'+num(data.managedLoadCount)+'</span></div></td></tr>';
   body+=totalRow('Total VA',data.serviceTotalVA,data.generatorTotalVA,'final-total-row');
   body+='<tr class="final-amps-row"><td><strong>Calculated Amps</strong></td><td></td><td class="number"><strong>'+Math.ceil(Number(data.serviceCurrent)||0)+' A</strong></td><td class="number"><strong>'+Math.ceil(Number(data.generatorCurrent)||0)+' A</strong></td></tr>';
-  report.innerHTML='<div class="print-page"><div class="generator-print-heading"><div class="print-brand"><span class="print-brand-main">LoadCalc</span><span class="print-brand-accent">Pro X</span></div><div class="print-title-text">Generator Optional Method Calculator</div></div><div class="print-project"><div><strong>Project:</strong> '+esc(value('projectName'))+'</div><div><strong>Project #:</strong> '+esc(value('projectNumber'))+'</div><div><strong>Address:</strong> '+esc(value('projectAddress'))+'</div><div><strong>City / State:</strong> '+esc(value('projectCityState'))+'</div></div><table class="print-table"><thead><tr><th>Description</th><th>Quantity</th><th>Service Load</th><th>Generator Load</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+
+  const pageClass='print-page'+(generic?' calculation-only':'')+(compact?' compact':'');
+  const heading=generic
+    ? '<div class="generator-print-heading"><div class="print-title-text">Generator Optional Method Load Calculation</div></div>'
+    : '<div class="generator-print-heading"><div class="print-brand"><span class="print-brand-main">LoadCalc</span><span class="print-brand-accent">Pro X</span></div><div class="print-title-text">Generator Optional Method Calculator</div></div>';
+
+  report.innerHTML='<div class="'+pageClass+'">'+heading+'<div class="print-project"><div><strong>Project:</strong> '+esc(value('projectName'))+'</div><div><strong>Project #:</strong> '+esc(value('projectNumber'))+'</div><div><strong>Address:</strong> '+esc(value('projectAddress'))+'</div><div><strong>City / State:</strong> '+esc(value('projectCityState'))+'</div></div><table class="print-table"><thead><tr><th>Description</th><th>Quantity</th><th>Service Load</th><th>Generator Load</th></tr></thead><tbody>'+body+'</tbody></table></div>';
 };
-window.printCalculation=function(){if(typeof window.calculate==='function')window.calculate();window.print()};
-installStyle();if(typeof window.calculate==='function')window.calculate();
+
+window.printCalculation=function(){
+  if(typeof window.calculate==='function')window.calculate();
+  window.print();
+};
+
+installStyle();
+if(typeof window.calculate==='function')window.calculate();
 })();

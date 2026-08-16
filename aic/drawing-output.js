@@ -28,6 +28,16 @@
     try{if(typeof w.updatePanelControls==='function')w.updatePanelControls()}catch(e){}
   }
 
+  function installTrialNavigation(){
+    const button=document.getElementById('calculatorsBtn');
+    if(!button)return;
+    button.onclick=function(){
+      const trialEmail=localStorage.getItem('loadcalcproTrialEmail');
+      const trialCode=localStorage.getItem('loadcalcproTrialCode');
+      location.href=(trialEmail&&trialCode)?'../trial-dashboard.html':'../member-dashboard.html';
+    };
+  }
+
   function clampOuterScroll(){
     const top=frame.getBoundingClientRect().top+window.scrollY;
     const bottom=top+frame.offsetHeight;
@@ -144,6 +154,7 @@
   function install(){
     const d=innerDoc();
     if(!d)return;
+    installTrialNavigation();
     ensureOneInitialPanel();
     installMotorRowControls(d);
     installDrawingPrint();
@@ -159,5 +170,6 @@
   });
   layout.addEventListener('change',()=>setTimeout(installDrawingPrint,0));
   printType.addEventListener('change',()=>setTimeout(installDrawingPrint,0));
+  installTrialNavigation();
   try{if(innerDoc()?.readyState==='complete')install()}catch(e){}
 })();

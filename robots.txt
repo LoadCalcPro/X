@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+Disallow: /member-dashboard.html
+Disallow: /create-password.html
+Disallow: /manage-membership.html
+Disallow: /trial-dashboard.html
+Disallow: /generator/
+Disallow: /aic/
+Disallow: /aic_calculator.html
+Disallow: /aic_calculator.pre-split.html
+
+Sitemap: https://loadcalcprox.com/sitemap.xml

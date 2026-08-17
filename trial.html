@@ -51,6 +51,11 @@
   if(incoming)code.value=incoming.toUpperCase();else if(savedCode)code.value=savedCode;
 
   function show(text,type){message.textContent=text;message.className='message show '+type}
+  function clearSavedTrial(){
+    localStorage.removeItem(EMAIL_KEY);
+    localStorage.removeItem(CODE_KEY);
+    localStorage.removeItem(EXPIRES_KEY);
+  }
   form.addEventListener('submit',async function(event){
     event.preventDefault();actions.classList.remove('show');button.disabled=true;button.textContent='Checking Access…';
     try{
@@ -66,7 +71,10 @@
       let text=data.message||'Your promotional trial is active.';
       if(expires)text+=' Your access expires '+expires+'.';
       show(text,'success');actions.classList.add('show');
-    }catch(error){show(error.message||'Unable to activate or enter the trial.','error')}
+    }catch(error){
+      clearSavedTrial();
+      show(error.message||'Unable to activate or enter the trial.','error');
+    }
     finally{button.disabled=false;button.textContent='Activate / Enter Trial'}
   });
 })();

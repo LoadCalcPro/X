@@ -84,6 +84,36 @@
     });
   }
 
+  function closePrintWindowAndReturn(printWindow){
+    try { window.focus(); } catch (error) {}
+    try {
+      if (printWindow && !printWindow.closed) printWindow.close();
+    } catch (error) {}
+  }
+
+  function installReturnToCalculator(printWindow){
+    if (!printWindow) return;
+    let finished = false;
+    const finish = function(){
+      if (finished) return;
+      finished = true;
+      closePrintWindowAndReturn(printWindow);
+    };
+
+    try { printWindow.addEventListener('afterprint', finish, {once:true}); } catch (error) {}
+
+    // Some mobile browsers restore focus instead of firing afterprint reliably.
+    try {
+      printWindow.addEventListener('focus', function handleFocus(){
+        if (!printWindow.__aicPrintStarted) return;
+        printWindow.removeEventListener('focus', handleFocus);
+        setTimeout(finish, 80);
+      });
+    } catch (error) {}
+
+    return finish;
+  }
+
   function printPhoneWithSelectedLayout(event){
     if (!isPhoneLayout()) return;
     event.preventDefault();
@@ -103,12 +133,13 @@
       return;
     }
 
+    const returnToCalculator = installReturnToCalculator(printWindow);
     const restoreAutoValues = temporarilyClearAutoOnlyPanels(doc);
 
     try {
       if (typeof win.buildCleanPrintReports !== 'function' || typeof win.createPrintPages !== 'function') {
         restoreAutoValues();
-        printWindow.close();
+        returnToCalculator && returnToCalculator();
         console.error('AIC phone print routine is not available');
         return;
       }
@@ -119,14 +150,14 @@
       restoreAutoValues();
 
       if (!count) {
-        printWindow.close();
+        returnToCalculator && returnToCalculator();
         win.alert('Enter calculation information before printing.');
         return;
       }
 
       const sourcePages = doc.getElementById('printPages');
       if (!sourcePages) {
-        printWindow.close();
+        returnToCalculator && returnToCalculator();
         console.error('AIC phone print pages were not created');
         return;
       }
@@ -136,7 +167,7 @@
       sourcePages.remove();
 
       if (!clonedPages.querySelector('.print-report-card')) {
-        printWindow.close();
+        returnToCalculator && returnToCalculator();
         win.alert('Enter calculation information before printing.');
         return;
       }
@@ -148,11 +179,17 @@
       printWindow.document.close();
       printWindow.focus();
       setTimeout(() => {
-        try { printWindow.print(); } catch (error) { console.error('AIC phone print failed', error); }
+        try {
+          printWindow.__aicPrintStarted = true;
+          printWindow.print();
+        } catch (error) {
+          returnToCalculator && returnToCalculator();
+          console.error('AIC phone print failed', error);
+        }
       }, 120);
     } catch (error) {
       restoreAutoValues();
-      try { printWindow.close(); } catch (closeError) {}
+      returnToCalculator && returnToCalculator();
       console.error('AIC phone print failed', error);
     }
   }

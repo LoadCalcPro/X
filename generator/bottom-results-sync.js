@@ -47,23 +47,29 @@ function installPrintControlStyles(){
   style.textContent=`
     .generator-print-control{display:flex;align-items:center;gap:7px;min-height:42px;padding:5px 8px;border:1px solid rgba(255,255,255,.35);border-radius:9px;color:#fff;font-size:12px;font-weight:800;white-space:nowrap}
     .generator-print-control select{min-height:30px;border:0;border-radius:7px;padding:4px 7px;background:#fff;color:#111827;font-size:12px;font-weight:700}
-    .generator-main-site{display:none}
+    .generator-main-site{display:flex;align-items:center;justify-content:center}
+
+    /* Customer-facing branding is the same on phone and computer. */
+    .app-header{background:#071b47!important}
+    .brand-row{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important}
+    .app-brand{display:inline-flex!important;align-items:center!important;order:0!important;padding:0!important;color:#fff!important;font-size:0!important;line-height:1!important}
+    .app-brand .bolt{color:#ff7a45!important;font-size:29px!important;margin-right:5px!important}
+    .app-brand::after{content:'LoadCalcPro ';color:#fff;font-size:29px;font-weight:900;letter-spacing:-.025em}
+    .app-brand .brand-x{order:3!important;color:#5eead4!important;font-size:29px!important;margin-left:0!important}
+    .brand-row>div:first-child{display:flex!important;flex-direction:column!important;order:1!important;margin-top:14px!important}
+    .app-title{margin:0!important;color:#fff!important;font-size:22px!important;line-height:1.15!important;font-weight:900!important}
+    .app-title::before,.app-title::after{content:none!important}
+    .app-version{margin-top:6px!important;color:#dbeafe!important;font-size:12px!important;font-weight:700!important}
+
     @media(max-width:760px){
-      .app-header{padding:15px 14px 17px!important;background:#071b47!important}
-      .brand-row{display:block!important}
-      .app-brand{display:inline-flex!important;align-items:center!important;order:0!important;padding:0!important;font-size:0!important;line-height:1!important}
-      .app-brand .bolt{color:#ff7a45!important;font-size:23px!important;margin-right:5px!important}
-      .app-brand::after{content:'LoadCalcPro ';color:#fff;font-size:23px;font-weight:900;letter-spacing:-.025em}
-      .app-brand .brand-x{order:3!important;color:#5eead4!important;font-size:23px!important;margin-left:0!important}
-      .brand-row>div:first-child{display:flex!important;flex-direction:column!important}
-      .app-brand{position:absolute!important;top:15px!important;left:14px!important}
-      .brand-row{padding-top:38px!important}
-      .app-title{margin:0!important;font-size:18px!important;line-height:1.15!important;font-weight:900!important;color:#fff!important}
-      .app-version{margin-top:6px!important;color:#dbeafe!important;font-size:12px!important;font-weight:700!important}
+      .app-header{padding:15px 14px 17px!important}
+      .app-brand .bolt{font-size:23px!important}
+      .app-brand::after,.app-brand .brand-x{font-size:23px!important}
+      .brand-row>div:first-child{margin-top:10px!important}
+      .app-title{font-size:18px!important}
       .header-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:18px!important}
       .header-actions button{min-height:46px!important;border:1px solid rgba(255,255,255,.40)!important;border-radius:9px!important;padding:10px 14px!important;background:rgba(255,255,255,.10)!important;color:#fff!important;font-size:13px!important;font-weight:800!important;white-space:normal!important}
       .header-actions button.primary{background:#0f766e!important;border-color:#2dd4bf!important}
-      .generator-main-site{display:flex!important;align-items:center!important;justify-content:center!important}
       .generator-print-control{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;width:100%!important;min-height:46px!important;padding:7px 8px!important;border:1px solid rgba(255,255,255,.40)!important;border-radius:9px!important;background:rgba(255,255,255,.10)!important}
       .generator-print-control select{width:100%!important;min-width:0!important;min-height:39px!important;padding:8px 10px!important;border:0!important;border-radius:7px!important;background:#fff!important;color:#111827!important;font-size:13px!important;font-weight:700!important}
     }
@@ -91,7 +97,7 @@ function installPrintControls(){
   actions.insertBefore(control,printButton);
 }
 
-function installAicStylePhoneHeader(){
+function installCustomerHeader(){
   const title=document.querySelector('.app-title');
   const version=document.querySelector('.app-version');
   const actions=document.querySelector('.header-actions');
@@ -127,7 +133,7 @@ function init(){
   document.addEventListener('click',function(){setTimeout(syncBottomResults,0)});
   installPrintControlStyles();
   installPrintControls();
-  installAicStylePhoneHeader();
+  installCustomerHeader();
   setTimeout(installTrialNavigation,100);
   setTimeout(installTrialNavigation,500);
   loadPrintRenderer();

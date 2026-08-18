@@ -49,23 +49,32 @@ function installPrintControlStyles(){
     .generator-print-control select{min-height:30px;border:0;border-radius:7px;padding:4px 7px;background:#fff;color:#111827;font-size:12px;font-weight:700}
     .generator-main-site{display:flex;align-items:center;justify-content:center}
 
-    /* Customer-facing branding is the same on phone and computer. */
     .app-header{background:#071b47!important}
-    .brand-row{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important}
-    .app-brand{display:inline-flex!important;align-items:center!important;order:0!important;padding:0!important;color:#fff!important;font-size:0!important;line-height:1!important}
-    .app-brand .bolt{color:#ff7a45!important;font-size:29px!important;margin-right:5px!important}
-    .app-brand::after{content:'LoadCalcPro ';color:#fff;font-size:29px;font-weight:900;letter-spacing:-.025em}
-    .app-brand .brand-x{order:3!important;color:#5eead4!important;font-size:29px!important;margin-left:0!important}
-    .brand-row>div:first-child{display:flex!important;flex-direction:column!important;order:1!important;margin-top:14px!important}
-    .app-title{margin:0!important;color:#fff!important;font-size:22px!important;line-height:1.15!important;font-weight:900!important}
+    .app-brand{display:inline-flex!important;align-items:center!important;padding:0!important;color:#fff!important;font-size:0!important;line-height:1!important}
+    .app-brand .bolt{color:#ff7a45!important;margin-right:5px!important}
+    .app-brand::after{content:'LoadCalcPro ';color:#fff;font-weight:900;letter-spacing:-.025em}
+    .app-brand .brand-x{order:3!important;color:#5eead4!important;margin-left:0!important}
+    .app-title{margin:0!important;color:#fff!important;line-height:1.15!important;font-weight:900!important}
     .app-title::before,.app-title::after{content:none!important}
     .app-version{margin-top:6px!important;color:#dbeafe!important;font-size:12px!important;font-weight:700!important}
 
+    /* Desktop screen: match the AIC header — logo and calculator title share one row. */
+    @media(min-width:761px){
+      .brand-row{display:flex!important;flex-direction:row!important;align-items:flex-start!important;justify-content:flex-start!important;gap:30px!important}
+      .app-brand{order:0!important;flex:0 0 auto!important;margin-top:1px!important}
+      .app-brand .bolt,.app-brand::after,.app-brand .brand-x{font-size:29px!important}
+      .brand-row>div:first-child{display:flex!important;flex-direction:column!important;order:1!important;margin-top:0!important;min-width:0!important}
+      .app-title{font-size:22px!important;white-space:nowrap!important}
+    }
+
+    /* Phone stays exactly in its existing stacked layout. */
     @media(max-width:760px){
       .app-header{padding:15px 14px 17px!important}
+      .brand-row{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important}
+      .app-brand{order:0!important}
       .app-brand .bolt{font-size:23px!important}
       .app-brand::after,.app-brand .brand-x{font-size:23px!important}
-      .brand-row>div:first-child{margin-top:10px!important}
+      .brand-row>div:first-child{display:flex!important;flex-direction:column!important;order:1!important;margin-top:10px!important}
       .app-title{font-size:18px!important}
       .header-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:18px!important}
       .header-actions button{min-height:46px!important;border:1px solid rgba(255,255,255,.40)!important;border-radius:9px!important;padding:10px 14px!important;background:rgba(255,255,255,.10)!important;color:#fff!important;font-size:13px!important;font-weight:800!important;white-space:normal!important}

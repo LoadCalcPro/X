@@ -399,84 +399,9 @@ function buildCleanPrintReports() {
   });
 }
 
-const PRINT_LAYOUT_KEY = 'loadCalcProAicPrintLayout';
-
-function selectedPrintLayout() {
-  const select = document.getElementById('printLayout');
-  const value = Number(select?.value || 4);
-  return [1,2,4,8].includes(value) ? value : 4;
-}
-
-function restorePrintLayout() {
-  const select = document.getElementById('printLayout');
-  if (!select) return;
-  const saved = Number(localStorage.getItem(PRINT_LAYOUT_KEY));
-  if ([1,2,4,8].includes(saved)) select.value = String(saved);
-  select.addEventListener('change', () => localStorage.setItem(PRINT_LAYOUT_KEY, select.value));
-}
-
 function removePrintPages() {
   document.getElementById('printPages')?.remove();
 }
-
-function createPrintPages(layout) {
-  removePrintPages();
-  const printableCards = Array.from(document.querySelectorAll('#calculationsContainer > .card'))
-    .filter((card, index) => hasCalculationData(index + 1));
-
-  if (!printableCards.length) return 0;
-
-  const printPages = document.createElement('div');
-  printPages.id = 'printPages';
-  printPages.className = 'print-pages';
-
-  for (let start = 0; start < printableCards.length; start += layout) {
-    const page = document.createElement('section');
-    page.className = 'print-page';
-    page.dataset.layout = String(layout);
-    page.innerHTML = `
-      <header class="print-page-header">
-        <div class="print-page-brand">⚡ LoadCalcPro<span class="brand-x">X</span></div>
-        <div class="print-page-title">Available Fault Current (AIC) Report</div>
-      </header>
-      <div class="print-page-grid"></div>`;
-
-    const grid = page.querySelector('.print-page-grid');
-    printableCards.slice(start, start + layout).forEach(card => {
-      const wrapper = document.createElement('article');
-      wrapper.className = 'print-report-card';
-      wrapper.appendChild(card.querySelector('.clean-print-report').cloneNode(true));
-      grid.appendChild(wrapper);
-    });
-    printPages.appendChild(page);
-  }
-
-  document.body.appendChild(printPages);
-  return printableCards.length;
-}
-
-let printInProgress = false;
-
-function preparePrint() {
-  if (printInProgress) return;
-
-  buildCleanPrintReports();
-  const layout = selectedPrintLayout();
-  localStorage.setItem(PRINT_LAYOUT_KEY, String(layout));
-  const reportCount = createPrintPages(layout);
-  if (!reportCount) {
-    alert('Enter calculation information before printing.');
-    return;
-  }
-
-  printInProgress = true;
-  window.print();
-}
-
-window.addEventListener('afterprint', () => {
-  printInProgress = false;
-  removePrintPages();
-});
 
 function saveCurrentValues() {
   const data = { panelCount: panelCount(), values: {} };
@@ -569,7 +494,6 @@ function initialize() {
   document.getElementById('removePanelBtn').addEventListener('click', removeLastPanel);
   document.getElementById('continuePreviousBtn').addEventListener('click', continuePreviousCalculation);
   document.getElementById('startNewBtn').addEventListener('click', startNewCalculation);
-  restorePrintLayout();
   updatePanelControls();
 }
 

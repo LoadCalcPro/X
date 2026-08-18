@@ -104,15 +104,31 @@ function installCustomerHeader(){
   if(title)title.textContent='Generator Optional Method Calculator';
   if(version)version.textContent='Version 1.0';
   if(!actions)return;
-  let mainSite=actions.querySelector('.generator-main-site');
+
+  const mainSiteButtons=Array.from(actions.querySelectorAll('button')).filter(button=>{
+    const text=String(button.textContent||'').trim().toLowerCase();
+    const onclick=String(button.getAttribute('onclick')||'').toLowerCase();
+    return button.classList.contains('generator-main-site')||text==='main site'||onclick.includes("../index.html")||onclick.includes("index.html");
+  });
+
+  let mainSite=mainSiteButtons.shift()||null;
+  mainSiteButtons.forEach(button=>button.remove());
+
   if(!mainSite){
     mainSite=document.createElement('button');
     mainSite.type='button';
-    mainSite.className='generator-main-site';
-    mainSite.textContent='Main Site';
-    mainSite.addEventListener('click',()=>{window.location.href='../index.html';});
     actions.insertBefore(mainSite,actions.firstChild);
   }
+
+  mainSite.classList.add('generator-main-site');
+  mainSite.textContent='Main Site';
+  mainSite.removeAttribute('onclick');
+  mainSite.onclick=function(event){
+    if(event){event.preventDefault();event.stopPropagation();}
+    window.location.href='../index.html';
+    return false;
+  };
+
   installTrialNavigation();
 }
 

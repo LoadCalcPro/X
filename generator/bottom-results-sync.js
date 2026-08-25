@@ -1,6 +1,50 @@
 (function(){
 'use strict';
 
+function hasEnteredValue(ids){
+  return ids.some(function(id){
+    const el=document.getElementById(id);
+    return !!(el&&String(el.value||'').trim()!=='');
+  });
+}
+
+function calculationStarted(){
+  const ids=['q5','q6','q7'];
+  for(let row=10;row<=30;row++){ids.push('q'+row,'v'+row);}
+  ids.push('q37','v37','q38','v38','q42','v42','q43','v43','q47','v47');
+  if(hasEnteredValue(ids))return true;
+  return !!document.querySelector('.heating-method-choice[aria-pressed="true"],#multipleHvacSystemsChoice[aria-pressed="true"]');
+}
+
+function generalApplianceStarted(){
+  const ids=['q5','q6','q7'];
+  for(let row=10;row<=30;row++){ids.push('q'+row,'v'+row);}
+  return hasEnteredValue(ids);
+}
+
+function hvacContinuousStarted(){
+  const ids=['q37','v37','q38','v38','q42','v42','q43','v43','q47','v47'];
+  if(hasEnteredValue(ids))return true;
+  return !!document.querySelector('.heating-method-choice[aria-pressed="true"],#multipleHvacSystemsChoice[aria-pressed="true"]');
+}
+
+function blankZero(id,started){
+  const el=document.getElementById(id);
+  if(!el||started)return;
+  const text=String(el.textContent||'').trim();
+  if(text==='0'||text==='0 A'||text==='0 VA')el.textContent='';
+}
+
+function syncBlankInitialSummaries(){
+  blankZero('generalApplianceService',generalApplianceStarted());
+  blankZero('generalApplianceGenerator',generalApplianceStarted());
+  blankZero('hvacContinuousService',hvacContinuousStarted());
+  blankZero('hvacContinuousGenerator',hvacContinuousStarted());
+  blankZero('calcSummaryServiceVA',calculationStarted());
+  blankZero('calcSummaryGeneratorVA',calculationStarted());
+  blankZero('bottomManagedLoadCount',calculationStarted());
+}
+
 function syncBottomResults(){
   const serviceSource=document.getElementById('serviceAmps');
   const generatorSource=document.getElementById('generatorAmps');
@@ -8,6 +52,7 @@ function syncBottomResults(){
   const generatorView=document.getElementById('generatorAmpsView');
   if(serviceSource&&serviceView)serviceView.textContent=String(serviceSource.textContent||'0 A').trim()||'0 A';
   if(generatorSource&&generatorView)generatorView.textContent=String(generatorSource.textContent||'0 A').trim()||'0 A';
+  syncBlankInitialSummaries();
 }
 
 function observe(id){
@@ -58,7 +103,6 @@ function installPrintControlStyles(){
     .app-title::before,.app-title::after{content:none!important}
     .app-version{margin-top:6px!important;color:#dbeafe!important;font-size:12px!important;font-weight:700!important}
 
-    /* Desktop screen: match the AIC header — logo and calculator title share one row. */
     @media(min-width:761px){
       .brand-row{display:flex!important;flex-direction:row!important;align-items:flex-start!important;justify-content:flex-start!important;gap:30px!important}
       .app-brand{order:0!important;flex:0 0 auto!important;margin-top:1px!important}
@@ -67,7 +111,6 @@ function installPrintControlStyles(){
       .app-title{font-size:22px!important;white-space:nowrap!important}
     }
 
-    /* Phone stays exactly in its existing stacked layout. */
     @media(max-width:760px){
       .app-header{padding:15px 14px 17px!important}
       .brand-row{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important}
@@ -159,6 +202,9 @@ function init(){
   installPrintControlStyles();
   installPrintControls();
   installCustomerHeader();
+  setTimeout(syncBlankInitialSummaries,0);
+  setTimeout(syncBlankInitialSummaries,100);
+  setTimeout(syncBlankInitialSummaries,500);
   setTimeout(installTrialNavigation,100);
   setTimeout(installTrialNavigation,500);
   loadPrintRenderer();

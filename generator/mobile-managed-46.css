@@ -313,6 +313,34 @@
   }
   .card:has(#applianceRows) .v3-column-header > *:first-child{padding-left:12px!important}
 
+  /* Custom appliance descriptions match the Continuous Loads entry-box treatment. */
+  #applianceRows .descInput{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:31px!important;
+    margin:0!important;
+    border:1px solid #cbd6e2!important;
+    border-radius:4px!important;
+    padding:4px 7px!important;
+    background:#fff!important;
+    color:#111827!important;
+    box-shadow:none!important;
+    font-size:var(--ui-description-size-desktop)!important;
+    line-height:1.25!important;
+    font-weight:var(--ui-medium)!important;
+    text-align:left!important;
+  }
+  #applianceRows .descInput::placeholder{
+    color:#9ca3af!important;
+    opacity:1!important;
+    font-weight:var(--ui-regular)!important;
+  }
+  #applianceRows .descInput:focus{
+    outline:2px solid #cbd5e1!important;
+    outline-offset:1px!important;
+  }
+
   /* Preserve the compact HVAC desktop typography exactly as the reference standard. */
   .v57-method-heading{
     font-size:13px!important;

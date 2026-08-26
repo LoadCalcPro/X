@@ -1,0 +1,82 @@
+/*
+  LoadCalcPro X Generator — SHARED LOAD-ENTRY GRID AUTHORITY
+  ----------------------------------------------------------
+  Appliance Loads is the master desktop geometry.
+  HVAC load-entry rows and Continuous Loads use the same six columns.
+  This file controls geometry only; it does not change calculations,
+  HVAC behavior, typography, managed-load logic, or phone layout.
+*/
+
+@media screen and (min-width:900px){
+  :root{
+    --load-col-description:minmax(224px,2.15fr);
+    --load-col-quantity:82px;
+    --load-col-va:100px;
+    --load-col-managed:86px;
+    --load-col-service:minmax(130px,1fr);
+    --load-col-generator:minmax(142px,1.08fr);
+    --load-entry-grid:var(--load-col-description) var(--load-col-quantity) var(--load-col-va) var(--load-col-managed) var(--load-col-service) var(--load-col-generator);
+  }
+
+  /* One six-column grid from Appliance through HVAC and Continuous. */
+  .card:has(#applianceRows) .v3-column-header,
+  #applianceRows .load-row,
+  #v57HvacMethodSections .section-column-header,
+  #v57HvacMethodSections .v57-system-row,
+  #v57HvacMethodSections .v57-method-row,
+  .continuous-loads-card .v3-column-header,
+  .continuous-loads-card .section-column-header,
+  .continuous-loads-card .load-row,
+  .continuous-loads-card .calculation-summary-row:last-child{
+    grid-template-columns:var(--load-entry-grid)!important;
+  }
+
+  /* HVAC Qty and VA use the same 82px / 100px geometry as Appliance. */
+  #v57HvacMethodSections .v57-method-inputs{
+    display:grid!important;
+    grid-template-columns:var(--load-col-quantity) var(--load-col-va)!important;
+    column-gap:0!important;
+    row-gap:0!important;
+    width:calc(82px + 100px)!important;
+    min-width:calc(82px + 100px)!important;
+    max-width:calc(82px + 100px)!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  #v57HvacMethodSections .v57-method-inputs>*{
+    min-width:0!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  #v57HvacMethodSections .v57-method-inputs input{
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Keep all six-column headings on the same horizontal boundaries. */
+  .card:has(#applianceRows) .v3-column-header>*,
+  #v57HvacMethodSections .section-column-header>*,
+  .continuous-loads-card .v3-column-header>*,
+  .continuous-loads-card .section-column-header>*{
+    min-width:0!important;
+    padding-left:8px!important;
+    padding-right:8px!important;
+    white-space:nowrap!important;
+  }
+  .card:has(#applianceRows) .v3-column-header>*:first-child,
+  #v57HvacMethodSections .section-column-header>*:first-child,
+  .continuous-loads-card .v3-column-header>*:first-child,
+  .continuous-loads-card .section-column-header>*:first-child{
+    padding-left:12px!important;
+  }
+
+  /* Managed Quantity remains directly under the Managed column. */
+  .continuous-loads-card .calculation-summary-row:last-child>span:first-child{
+    grid-column:1 / 4!important;
+  }
+  .continuous-loads-card .calculation-summary-row:last-child>span:last-child{
+    grid-column:4!important;
+  }
+}

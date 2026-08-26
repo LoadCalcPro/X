@@ -6,7 +6,7 @@ function installSharedGridAuthority(){
   const link=document.createElement('link');
   link.id='loadGridAuthority';
   link.rel='stylesheet';
-  link.href='load-grid-authority.css?v=2';
+  link.href='load-grid-authority.css?v=5';
   document.head.appendChild(link);
 }
 

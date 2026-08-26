@@ -260,7 +260,6 @@
   }
   .app-version::after{content:"NEC 2023 | Version 1.0";font-size:12px!important}
 
-  /* One section-heading rule for every normal calculator section. */
   .card-heading,
   .project-card .card-heading,
   .voltage-card .card-heading{
@@ -300,18 +299,39 @@
     font-weight:var(--ui-regular)!important;
   }
 
-  /* Appliance grid: Managed gets enough room and all headers stay distinct. */
+  /* Appliance is the one six-column desktop standard. */
   .card:has(#applianceRows) .v3-column-header,
-  #applianceRows .load-row{
+  #applianceRows .load-row,
+  .continuous-loads-card .v3-column-header,
+  .continuous-loads-card .load-row,
+  #v57HvacMethodSections .section-column-header,
+  #v57HvacMethodSections .v57-system-row,
+  #v57HvacMethodSections .v57-method-row{
     grid-template-columns:minmax(224px,2.15fr) 82px 100px 86px minmax(130px,1fr) minmax(142px,1.08fr)!important;
   }
-  .card:has(#applianceRows) .v3-column-header > *{
+  .card:has(#applianceRows) .v3-column-header > *,
+  .continuous-loads-card .v3-column-header > *,
+  #v57HvacMethodSections .section-column-header > *{
     min-width:0!important;
     padding-left:8px!important;
     padding-right:8px!important;
     white-space:nowrap!important;
   }
-  .card:has(#applianceRows) .v3-column-header > *:first-child{padding-left:12px!important}
+  .card:has(#applianceRows) .v3-column-header > *:first-child,
+  .continuous-loads-card .v3-column-header > *:first-child,
+  #v57HvacMethodSections .section-column-header > *:first-child{padding-left:12px!important}
+
+  .continuous-loads-card .load-row>*{padding-left:8px!important;padding-right:8px!important}
+  .continuous-loads-card .continuous-load-name{padding-left:8px!important;padding-right:8px!important}
+  .continuous-loads-card .inline-managed-controls{justify-content:center!important}
+  .continuous-loads-card .section-column-header{display:grid!important;width:100%!important}
+
+  /* Managed Quantity uses the same Managed column as the checkmarks above. */
+  .continuous-loads-card .calculation-summary-row:last-child{
+    grid-template-columns:minmax(224px,2.15fr) 82px 100px 86px minmax(130px,1fr) minmax(142px,1.08fr)!important;
+  }
+  .continuous-loads-card .calculation-summary-row:last-child>span:first-child{grid-column:1 / 4!important}
+  .continuous-loads-card .calculation-summary-row:last-child>span:last-child{grid-column:4!important}
 
   /* Custom appliance descriptions match the Continuous Loads entry-box treatment. */
   #applianceRows .descInput{
@@ -406,6 +426,9 @@
     grid-column:4!important;
     color:#111827!important;
     text-align:center!important;
+  }
+  .continuous-loads-card .calculation-summary-row:last-child{
+    grid-template-columns:minmax(224px,2.15fr) 82px 100px 86px minmax(130px,1fr) minmax(142px,1.08fr)!important;
   }
 
   .total-load-panel{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:18px!important}

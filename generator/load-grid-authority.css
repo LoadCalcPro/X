@@ -31,24 +31,18 @@
     grid-template-columns:var(--load-entry-grid)!important;
   }
 
-  /*
-    HVAC rows have five direct children because Qty + VA are wrapped together.
-    Place that wrapper across columns 2 and 3, then put Managed, Service and
-    Generator into columns 4, 5 and 6. This prevents the Qty wrapper from
-    overflowing the Quantity column and crushing the VA field.
-  */
+  /* HVAC rows have four direct children:
+     Description | Qty+VA wrapper | Managed | Service+Generator wrapper. */
   #v57HvacMethodSections .v57-method-row>*:nth-child(1){grid-column:1!important}
   #v57HvacMethodSections .v57-method-row>*:nth-child(2){grid-column:2 / 4!important}
   #v57HvacMethodSections .v57-method-row>*:nth-child(3){grid-column:4!important}
-  #v57HvacMethodSections .v57-method-row>*:nth-child(4){grid-column:5!important}
-  #v57HvacMethodSections .v57-method-row>*:nth-child(5){grid-column:6!important}
+  #v57HvacMethodSections .v57-method-row>*:nth-child(4){grid-column:5 / 7!important}
 
-  /* HVAC Qty and VA use the same 82px / 100px geometry as Appliance. */
+  /* Qty and VA use the exact Appliance column widths. */
   #v57HvacMethodSections .v57-method-inputs{
     display:grid!important;
     grid-template-columns:var(--load-col-quantity) var(--load-col-va)!important;
-    column-gap:0!important;
-    row-gap:0!important;
+    gap:0!important;
     width:100%!important;
     min-width:0!important;
     max-width:none!important;
@@ -59,12 +53,32 @@
     min-width:0!important;
     width:100%!important;
     margin:0!important;
+    padding:0!important;
   }
   #v57HvacMethodSections .v57-method-inputs input{
+    display:block!important;
     width:100%!important;
     min-width:0!important;
+    max-width:none!important;
     margin:0!important;
     box-sizing:border-box!important;
+  }
+
+  /* Service and Generator outputs occupy the same two columns as Appliance. */
+  #v57HvacMethodSections .v57-method-output{
+    display:grid!important;
+    grid-template-columns:var(--load-col-service) var(--load-col-generator)!important;
+    gap:0!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  #v57HvacMethodSections .v57-method-output>*{
+    min-width:0!important;
+    width:100%!important;
+    margin:0!important;
   }
 
   /* Keep all six-column headings on the same horizontal boundaries. */

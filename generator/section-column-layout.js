@@ -1,6 +1,15 @@
 (function(){
 'use strict';
 
+function installSharedGridAuthority(){
+  if(document.getElementById('loadGridAuthority'))return;
+  const link=document.createElement('link');
+  link.id='loadGridAuthority';
+  link.rel='stylesheet';
+  link.href='load-grid-authority.css?v=1';
+  document.head.appendChild(link);
+}
+
 function makeHeader(){
   const header=document.createElement('div');
   header.className='v3-column-header section-column-header';
@@ -57,6 +66,7 @@ function scheduleSync(){
   setTimeout(sync,60);
 }
 
+installSharedGridAuthority();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleSync,{once:true});else scheduleSync();
 
 document.addEventListener('click',function(event){

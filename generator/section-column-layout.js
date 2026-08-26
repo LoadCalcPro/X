@@ -6,7 +6,7 @@ function installSharedGridAuthority(){
   const link=document.createElement('link');
   link.id='loadGridAuthority';
   link.rel='stylesheet';
-  link.href='load-grid-authority.css?v=1';
+  link.href='load-grid-authority.css?v=2';
   document.head.appendChild(link);
 }
 
@@ -43,8 +43,6 @@ function syncHVACHeaders(){
   const body=card.querySelector('.card-body');
   if(!body)return;
 
-  /* The section-level header is intentionally removed. Column headings belong
-     with the actual HVAC system rows, not directly under HVAC Loads. */
   body.querySelectorAll(':scope > .v3-column-header').forEach(function(header){header.remove();});
 
   document.querySelectorAll('#v57HvacMethodSections .v522-system-group').forEach(function(group){
@@ -56,14 +54,31 @@ function syncHVACHeaders(){
   });
 }
 
+function syncHeaderLabels(){
+  const actions=document.querySelector('.header-actions');
+  if(!actions)return;
+
+  const printButton=Array.from(actions.querySelectorAll('button')).find(function(button){
+    return String(button.getAttribute('onclick')||'').includes('printCalculation');
+  });
+  if(printButton)printButton.textContent='Print / PDF';
+
+  const newButton=Array.from(actions.querySelectorAll('button')).find(function(button){
+    return String(button.getAttribute('onclick')||'').includes('startNewCalculationFromButton');
+  });
+  if(newButton)newButton.textContent='New Calculation';
+}
+
 function sync(){
   syncContinuousHeader();
   syncHVACHeaders();
+  syncHeaderLabels();
 }
 
 function scheduleSync(){
   setTimeout(sync,0);
   setTimeout(sync,60);
+  setTimeout(sync,250);
 }
 
 installSharedGridAuthority();

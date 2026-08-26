@@ -1,13 +1,72 @@
 /* Continuous Loads alignment: match Appliance Loads without changing calculations. */
 @media (min-width:900px){
-  .continuous-loads-card .load-row{align-items:start!important;min-height:58px!important;padding-top:7px!important;padding-bottom:7px!important}
-  .continuous-loads-card .continuous-load-name{grid-column:1!important;min-width:0!important;margin:0!important;padding-left:10px!important;padding-right:10px!important}
-  .continuous-loads-card .ev-charger-name{display:block!important;width:100%!important;height:31px!important;min-height:31px!important;padding:4px 7px!important;border:1px solid #9ca3af!important;border-radius:2px!important;background:#fff!important;color:#111827!important;font-size:13px!important;line-height:1.2!important;font-weight:600!important}
-  .continuous-loads-card input.editable-load-name{display:block!important;width:100%!important;height:31px!important;min-height:31px!important;margin:0!important;padding:4px 7px!important;border:1px solid #9ca3af!important;border-radius:2px!important;background:#fff!important;box-shadow:none!important;color:#111827!important;font-size:13px!important;line-height:1.2!important;font-weight:600!important;text-align:left!important}
-  .continuous-loads-card input.editable-load-name::placeholder{color:#64748b!important;opacity:1!important;font-weight:600!important}
-  .continuous-loads-card .continuous-load-note{margin-top:4px!important;color:#64748b!important;font-size:10px!important;line-height:1.25!important;font-weight:500!important}
-  .continuous-loads-card .load-inputs>.input-block:nth-child(1),.continuous-loads-card .load-inputs>.input-block:nth-child(2),.continuous-loads-card .inline-managed-controls,.continuous-loads-card .managed-row,.continuous-loads-card .row-output{align-self:start!important}
-  .continuous-loads-card .load-inputs>.input-block input{margin-top:0!important}
+  /* Use the same row rhythm as Appliance Loads. */
+  .continuous-loads-card .load-row{
+    align-items:center!important;
+    min-height:45px!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+  }
+
+  .continuous-loads-card .continuous-load-name{
+    grid-column:1!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+
+  /* EV Charger is fixed text, but it should read like the other description fields. */
+  .continuous-loads-card .ev-charger-name{
+    display:flex!important;
+    align-items:center!important;
+    width:100%!important;
+    height:31px!important;
+    min-height:31px!important;
+    padding:4px 7px!important;
+    border:1px solid #9ca3af!important;
+    border-radius:2px!important;
+    background:#fff!important;
+    color:#111827!important;
+    font-size:var(--ui-description-size-desktop)!important;
+    line-height:1.25!important;
+    font-weight:var(--ui-medium)!important;
+  }
+
+  /* Editable Continuous descriptions inherit the shared 15px / 600 description authority. */
+  .continuous-loads-card input.editable-load-name{
+    display:block!important;
+    width:100%!important;
+    height:31px!important;
+    min-height:31px!important;
+    margin:0!important;
+    padding:4px 7px!important;
+    border:1px solid #9ca3af!important;
+    border-radius:2px!important;
+    background:#fff!important;
+    box-shadow:none!important;
+    color:#111827!important;
+    font-size:var(--ui-description-size-desktop)!important;
+    line-height:1.25!important;
+    font-weight:var(--ui-medium)!important;
+    text-align:left!important;
+  }
+
+  .continuous-loads-card input.editable-load-name::placeholder{
+    color:#9ca3af!important;
+    opacity:1!important;
+    font-weight:var(--ui-regular)!important;
+  }
+
+  .continuous-loads-card .load-inputs>.input-block:nth-child(1),
+  .continuous-loads-card .load-inputs>.input-block:nth-child(2),
+  .continuous-loads-card .inline-managed-controls,
+  .continuous-loads-card .managed-row,
+  .continuous-loads-card .row-output{
+    align-self:center!important;
+  }
+
+  .continuous-loads-card .load-inputs>.input-block input{
+    margin-top:0!important;
+  }
 }
 
 /* Phone/tablet: a description box spans exactly the Qty + VA area, then the inputs follow immediately below. */

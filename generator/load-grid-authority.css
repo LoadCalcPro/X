@@ -3,8 +3,8 @@
   ----------------------------------------------------------
   Appliance Loads is the master desktop geometry.
   HVAC load-entry rows and Continuous Loads use the same six columns.
-  This file controls geometry only; it does not change calculations,
-  HVAC behavior, typography, managed-load logic, or phone layout.
+  Geometry only: no calculation, HVAC logic, managed logic, typography,
+  or phone behavior is changed here.
 */
 
 @media screen and (min-width:900px){
@@ -18,11 +18,9 @@
     --load-entry-grid:var(--load-col-description) var(--load-col-quantity) var(--load-col-va) var(--load-col-managed) var(--load-col-service) var(--load-col-generator);
   }
 
-  /* One six-column grid from Appliance through HVAC and Continuous. */
   .card:has(#applianceRows) .v3-column-header,
   #applianceRows .load-row,
   #v57HvacMethodSections .section-column-header,
-  #v57HvacMethodSections .v57-system-row,
   #v57HvacMethodSections .v57-method-row,
   .continuous-loads-card .v3-column-header,
   .continuous-loads-card .section-column-header,
@@ -31,47 +29,46 @@
     grid-template-columns:var(--load-entry-grid)!important;
   }
 
-  /* HVAC rows have four direct children:
-     Description | Qty+VA wrapper | Managed | Service+Generator wrapper. */
-  #v57HvacMethodSections .v57-method-row>*:nth-child(1){grid-column:1!important}
-  #v57HvacMethodSections .v57-method-row>*:nth-child(2){grid-column:2 / 4!important}
-  #v57HvacMethodSections .v57-method-row>*:nth-child(3){grid-column:4!important}
-  #v57HvacMethodSections .v57-method-row>*:nth-child(4){grid-column:5 / 7!important}
-
-  /* Qty and VA use the exact Appliance column widths. */
+  /*
+    HVAC Qty and VA are generated as two inputs inside .v57-method-inputs.
+    The wrapper must not create a second grid. Make it transparent so each
+    field occupies the real Quantity and VA master columns directly.
+  */
+  #v57HvacMethodSections .v57-method-name{
+    grid-column:1!important;
+    min-width:0!important;
+    margin:0!important;
+  }
   #v57HvacMethodSections .v57-method-inputs{
-    display:grid!important;
-    grid-template-columns:var(--load-col-quantity) var(--load-col-va)!important;
-    gap:0!important;
-    width:100%!important;
-    min-width:0!important;
-    max-width:none!important;
-    margin:0!important;
-    padding:0!important;
+    display:contents!important;
   }
-  #v57HvacMethodSections .v57-method-inputs>*{
-    min-width:0!important;
-    width:100%!important;
-    margin:0!important;
-    padding:0!important;
-  }
-  #v57HvacMethodSections .v57-method-inputs input{
-    display:block!important;
+  #v57HvacMethodSections .v57-method-inputs>input:nth-child(1){
+    grid-column:2!important;
     width:100%!important;
     min-width:0!important;
     max-width:none!important;
     margin:0!important;
     box-sizing:border-box!important;
   }
-
-  /* Service and Generator outputs occupy the same two columns as Appliance. */
+  #v57HvacMethodSections .v57-method-inputs>input:nth-child(2){
+    grid-column:3!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  #v57HvacMethodSections .v57-method-managed{
+    grid-column:4!important;
+    min-width:0!important;
+  }
   #v57HvacMethodSections .v57-method-output{
+    grid-column:5 / 7!important;
     display:grid!important;
     grid-template-columns:var(--load-col-service) var(--load-col-generator)!important;
     gap:0!important;
     width:100%!important;
     min-width:0!important;
-    max-width:none!important;
     margin:0!important;
     padding:0!important;
   }
@@ -81,7 +78,6 @@
     margin:0!important;
   }
 
-  /* Keep all six-column headings on the same horizontal boundaries. */
   .card:has(#applianceRows) .v3-column-header>*,
   #v57HvacMethodSections .section-column-header>*,
   .continuous-loads-card .v3-column-header>*,
@@ -98,7 +94,6 @@
     padding-left:12px!important;
   }
 
-  /* Managed Quantity remains directly under the Managed column. */
   .continuous-loads-card .calculation-summary-row:last-child>span:first-child{
     grid-column:1 / 4!important;
   }

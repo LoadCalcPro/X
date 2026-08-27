@@ -87,6 +87,27 @@ window.hasSavedCalculation=function(){
   };
 })();
 
+/* Restore the established calculator checkpoint totals and report polish.
+   This was previously part of the production generator but stopped loading
+   when the script list was simplified. Keep one guarded loader here. */
+(function(){
+  'use strict';
+
+  function loadReportPolish(){
+    if(document.querySelector('script[data-generator-report-polish]'))return;
+    const script=document.createElement('script');
+    script.src='report-polish.js?v=20260827-restore1';
+    script.dataset.generatorReportPolish='1';
+    document.body.appendChild(script);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',loadReportPolish,{once:true});
+  }else{
+    loadReportPolish();
+  }
+})();
+
 /* Load the consolidated print renderer after all legacy generator scripts have finished loading. */
 (function(){
   'use strict';

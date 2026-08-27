@@ -1342,7 +1342,7 @@ const generatorHVACContinuous =
 function connectStaticManagedControls(){
 
   const staticRows = [
-    37,38,39,40,42,43
+    37,38,39,40,42,43,47
   ];
 
   for(const row of staticRows){

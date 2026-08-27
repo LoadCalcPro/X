@@ -76,9 +76,9 @@ function sync(){
 }
 
 function scheduleSync(){
-  setTimeout(sync,0);
-  setTimeout(sync,60);
-  setTimeout(sync,250);
+  [0,60,250,600,1200].forEach(function(delay){
+    setTimeout(sync,delay);
+  });
 }
 
 installSharedGridAuthority();
@@ -86,6 +86,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 document.addEventListener('click',function(event){
   if(event.target.closest('.heating-method-choice,#multipleHvacSystemsChoice,.v522-add-system,.v523-remove-system,.v57-hp-option'))scheduleSync();
+});
+
+document.addEventListener('change',function(event){
+  if(event.target.closest('#v57HvacMethodSections,.heating-method-panel'))scheduleSync();
 });
 
 window.syncGeneratorSectionColumnHeaders=sync;

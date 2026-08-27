@@ -1,7 +1,7 @@
 /* LoadCalcPro X Generator — persistent storage authority.
    Loaded after script.js and before app-runtime.js.
-   This makes save/restore deterministic and keeps New Calculation as the only
-   intentional clearing path for the main calculator state. */
+   One storage key owns the calculator state. Saved work is protected during
+   startup until the user chooses Continue Previous Calculation or Start New. */
 (function(){
 'use strict';
 
@@ -14,58 +14,6 @@ const MANAGED_KEY =
   (typeof MANAGED_QTY_STORAGE_KEY !== 'undefined' && MANAGED_QTY_STORAGE_KEY)
     ? MANAGED_QTY_STORAGE_KEY
     : 'loadcalcpro_generator_mobile_managed_quantities_v1';
-
-function buildState(){
-  if(typeof calculatorState === 'function'){
-    return calculatorState();
-  }
-
-  const state = {
-    savedAt:new Date().toISOString(),
-    project:{},
-    inputs:{},
-    descriptions:{},
-    managedQuantities:{}
-  };
-
-  ['projectName','projectNumber','projectAddress','projectCityState']
-    .forEach(function(id){
-      const el=document.getElementById(id);
-      state.project[id]=el ? el.value : '';
-    });
-
-  document.querySelectorAll('input[id^="q"],input[id^="v"],select[id^="q"]')
-    .forEach(function(el){
-      state.inputs[el.id]=el.value;
-    });
-
-  document.querySelectorAll('input[id^="d"]')
-    .forEach(function(el){
-      state.descriptions[el.id]=el.value;
-    });
-
-  if(typeof managedQuantities !== 'undefined' && managedQuantities){
-    state.managedQuantities={...managedQuantities};
-  }
-
-  return state;
-}
-
-function writeState(){
-  try{
-    localStorage.setItem(KEY,JSON.stringify(buildState()));
-
-    if(typeof saveManagedQuantities === 'function'){
-      saveManagedQuantities();
-    }else if(typeof managedQuantities !== 'undefined'){
-      localStorage.setItem(MANAGED_KEY,JSON.stringify(managedQuantities||{}));
-    }
-
-    return true;
-  }catch(e){
-    return false;
-  }
-}
 
 function readState(){
   try{
@@ -104,11 +52,75 @@ function meaningful(data){
   return project || inputs || descriptions || managed;
 }
 
-/* Replace the legacy save/read/check functions with one storage authority. */
-window.saveState=function(showMessage){
+/* Capture the saved state before any DOMContentLoaded startup code can run.
+   This prevents a late startup calculation from replacing saved work with
+   the blank form before the restore decision is made. */
+const bootState=readState();
+let bootDecisionPending=meaningful(bootState);
+
+function buildState(){
+  if(typeof calculatorState === 'function'){
+    return calculatorState();
+  }
+
+  const state={
+    savedAt:new Date().toISOString(),
+    project:{},
+    inputs:{},
+    descriptions:{},
+    managedQuantities:{}
+  };
+
+  ['projectName','projectNumber','projectAddress','projectCityState']
+    .forEach(function(id){
+      const el=document.getElementById(id);
+      state.project[id]=el ? el.value : '';
+    });
+
+  document.querySelectorAll('input[id^="q"],input[id^="v"],select[id^="q"]')
+    .forEach(function(el){
+      state.inputs[el.id]=el.value;
+    });
+
+  document.querySelectorAll('input[id^="d"]')
+    .forEach(function(el){
+      state.descriptions[el.id]=el.value;
+    });
+
+  if(typeof managedQuantities !== 'undefined' && managedQuantities){
+    state.managedQuantities={...managedQuantities};
+  }
+
+  return state;
+}
+
+function writesAllowed(){
+  if(bootDecisionPending)return false;
   if(typeof suppressAutoSave!=='undefined' && suppressAutoSave)return false;
   if(typeof restorePromptOpen!=='undefined' && restorePromptOpen)return false;
+  return true;
+}
 
+function writeState(){
+  if(!writesAllowed())return false;
+
+  try{
+    localStorage.setItem(KEY,JSON.stringify(buildState()));
+
+    if(typeof saveManagedQuantities === 'function'){
+      saveManagedQuantities();
+    }else if(typeof managedQuantities !== 'undefined'){
+      localStorage.setItem(MANAGED_KEY,JSON.stringify(managedQuantities||{}));
+    }
+
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+/* Replace the legacy save/read/check functions with the single authority. */
+window.saveState=function(showMessage){
   const ok=writeState();
 
   if(showMessage!==false && typeof showSaveStatus==='function'){
@@ -118,10 +130,42 @@ window.saveState=function(showMessage){
   return ok;
 };
 
-window.savedState=readState;
+window.savedState=function(){
+  if(bootDecisionPending && bootState){
+    return bootState;
+  }
+  return readState();
+};
+
 window.hasSavedCalculation=function(){
+  if(bootDecisionPending)return true;
   return meaningful(readState());
 };
+
+/* Release startup protection only when the user makes the restore choice. */
+const originalContinue=window.continuePreviousCalculation;
+if(typeof originalContinue==='function'){
+  window.continuePreviousCalculation=function(){
+    bootDecisionPending=false;
+    return originalContinue.apply(this,arguments);
+  };
+}
+
+const originalStartNewSaved=window.startNewFromSavedPrompt;
+if(typeof originalStartNewSaved==='function'){
+  window.startNewFromSavedPrompt=function(){
+    bootDecisionPending=false;
+    return originalStartNewSaved.apply(this,arguments);
+  };
+}
+
+const originalStartNewButton=window.startNewCalculationFromButton;
+if(typeof originalStartNewButton==='function'){
+  window.startNewCalculationFromButton=function(){
+    bootDecisionPending=false;
+    return originalStartNewButton.apply(this,arguments);
+  };
+}
 
 /* Save immediately when any user-editable calculator field changes. */
 function onEdit(event){
@@ -141,15 +185,11 @@ function onEdit(event){
 document.addEventListener('input',onEdit,true);
 document.addEventListener('change',onEdit,true);
 
-/* pagehide is more dependable than beforeunload on phones and app-like browsers. */
-window.addEventListener('pagehide',function(){
-  if(typeof restorePromptOpen!=='undefined' && restorePromptOpen)return;
-  writeState();
-});
+/* pagehide and visibilitychange cover browser, phone, and app-like navigation. */
+window.addEventListener('pagehide',writeState);
 
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='hidden'){
-    if(typeof restorePromptOpen!=='undefined' && restorePromptOpen)return;
     writeState();
   }
 });

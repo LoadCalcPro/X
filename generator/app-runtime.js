@@ -74,13 +74,14 @@ function init(){syncBottomResults();observe('serviceAmps');observe('generatorAmp
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 
-/* Section column headers. */
+/* Section column headers. The HVAC selector is not a load-entry section; only
+   actual HVAC System groups receive the six-column load header. */
 (function(){
 'use strict';
 function makeHeader(){const header=document.createElement('div');header.className='v3-column-header section-column-header';header.innerHTML='<span>Description</span><span>Quantity</span><span>VA</span><span>Managed</span><span>Service Load</span><span>Generator Load</span>';return header}
 function cardByHeading(text){return Array.from(document.querySelectorAll('main .card')).find(function(card){const heading=card.querySelector('.card-heading');return heading&&String(heading.textContent||'').replace(/\s+/g,' ').trim()===text})||null}
 function syncContinuousHeader(){const card=document.querySelector('.continuous-loads-card')||cardByHeading('Continuous Loads');if(!card)return;const body=card.querySelector('.card-body');if(!body)return;let header=body.querySelector(':scope > .section-column-header');if(!header){header=makeHeader();const firstRow=body.querySelector(':scope > .load-row');if(firstRow)body.insertBefore(header,firstRow);else body.prepend(header)}}
-function syncHVACHeaders(){const root=document.getElementById('v57HvacMethodSections');if(!root)return;root.querySelectorAll('.v522-system-title').forEach(function(title){const group=title.parentElement;if(!group)return;let header=group.querySelector(':scope > .section-column-header');if(!header){header=makeHeader();title.insertAdjacentElement('afterend',header)}else if(header.previousElementSibling!==title){title.insertAdjacentElement('afterend',header)}})}
+function syncHVACHeaders(){const card=cardByHeading('HVAC Loads');const body=card&&card.querySelector('.card-body');if(body){body.querySelectorAll(':scope > .v3-column-header').forEach(function(header){header.remove()})}const root=document.getElementById('v57HvacMethodSections');if(!root)return;root.querySelectorAll('.v522-system-title').forEach(function(title){const group=title.parentElement;if(!group)return;let header=group.querySelector(':scope > .section-column-header');if(!header){header=makeHeader();title.insertAdjacentElement('afterend',header)}else if(header.previousElementSibling!==title){title.insertAdjacentElement('afterend',header)}})}
 function sync(){syncContinuousHeader();syncHVACHeaders()}
 function scheduleSync(){[0,60,250,600,1200].forEach(function(delay){setTimeout(sync,delay)})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleSync,{once:true});else scheduleSync();

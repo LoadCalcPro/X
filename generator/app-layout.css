@@ -37,8 +37,22 @@
 @media (max-width:899px){
   .managed-check,.inline-managed-controls .managed-check,.v57-managed-button{width:46px!important;min-width:46px!important;height:46px!important;min-height:46px!important}
   .managed-qty,.inline-managed-controls .managed-qty,.v57-managed-qty{width:46px!important;min-width:46px!important;height:46px!important;min-height:46px!important;padding:0!important}
-  .header-actions{grid-template-columns:1fr 1fr!important}
+
+  /* Phone header: mirror the AIC hierarchy without changing desktop. */
+  .app-header{padding:15px 14px 17px!important}
+  .brand-row{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important}
+  .app-brand{order:-1!important;align-self:flex-start!important;padding-top:0!important;margin:0!important;font-size:23px!important;line-height:1!important}
+  .app-brand .bolt{font-size:23px!important}
+  .brand-row>div:first-child{order:1!important;width:100%!important;min-width:0!important}
+  .app-title{margin:10px 0 0!important;font-size:clamp(14px,4.6vw,18px)!important;line-height:1.15!important;font-weight:900!important;white-space:nowrap!important}
+  .app-version{margin-top:6px!important;color:#dbeafe!important;font-size:12px!important;line-height:1.2!important;font-weight:700!important}
+
+  /* Keep the phone actions as three clean two-column rows. */
+  .header-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;margin-top:16px!important;width:100%!important}
   .header-actions button{min-height:52px!important;font-size:14px!important;font-weight:var(--ui-bold)!important}
+  .generator-print-control{grid-column:1 / -1!important;display:grid!important;grid-template-columns:1fr 1fr!important;align-items:center!important;gap:7px!important;width:100%!important;min-width:0!important;padding:7px 8px!important}
+  .generator-print-control select{width:100%!important;min-width:0!important;min-height:39px!important;padding:8px 10px!important;font-size:13px!important}
+
   .card-heading,.project-card .card-heading,.voltage-card .card-heading{font-size:var(--ui-section-size-mobile)!important;line-height:1.2!important;font-weight:var(--ui-bold)!important}
   .load-name,.field label{font-size:19px!important;line-height:1.35!important;font-weight:var(--ui-medium)!important}
   .section-note,.continuous-load-note,#v57NoMethodMessage,.heating-method-required-note,.forty-unit-warning{font-size:16px!important;line-height:1.5!important;font-weight:var(--ui-regular)!important}

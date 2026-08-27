@@ -31,7 +31,7 @@
 .checkpoint-total-label{margin-bottom:7px;font-size:13px;font-weight:700;color:#0f172a}
 .checkpoint-total-values{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .checkpoint-total-values>div{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #d8dee9;border-radius:8px;padding:8px 10px;background:#f8fafc}
-.checkpoint-total-values span{font-size:12px;font-weight:700;color:#475569}
+.checkpoint-total-values span{font-size:16px;font-weight:700;color:#475569}
 .checkpoint-total-values strong{font-size:15px;color:#0f172a;font-variant-numeric:tabular-nums}
 
 @media (max-width:899px){

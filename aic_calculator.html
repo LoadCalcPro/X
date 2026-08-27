@@ -50,13 +50,9 @@
       </div>
     </div>
 
-    <div class="form-titlebar">
-      <div>
-        <div class="form-title">Available Fault Current (AIC)</div>
-        <div class="form-version">Version 1.0</div>
-      </div>
-      <div class="title-actions"><button type="button" class="no-print secondary" onclick="window.location.href='member-dashboard.html'">Available Calculators</button><button type="button" class="no-print logout-button" id="logoutBtn">Log Out</button><div class="form-brand"><span class="bolt">⚡</span>LoadCalcPro<span class="brand-x">X</span></div></div>
-    </div>
+    <!-- Authentication still owns logout internally; the visible navigation now lives only in aic/index.html. -->
+    <button type="button" id="logoutBtn" hidden aria-hidden="true" tabindex="-1">Log Out</button>
+
     <main>
       <div class="grid">
         <div id="calculationsContainer">

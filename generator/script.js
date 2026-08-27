@@ -6912,31 +6912,15 @@ ${Math.ceil(
 
   function sync(){
 
-    /*
-      e35/f35 already include EVSE demand.
+   const service =
+  valueFrom('e35') +
+  valueFrom('e44') +
+  valueFrom('e45');
 
-      Add HVAC and only the non-EV
-      portion of continuous loads to
-      avoid omitting or double-counting.
-    */
-
-    const service =
-      valueFrom('e35') +
-      valueFrom('e44') +
-      Math.max(
-        valueFrom('e45') -
-        valueFrom('e43'),
-        0
-      );
-
-    const generator =
-      valueFrom('f35') +
-      valueFrom('f44') +
-      Math.max(
-        valueFrom('f45') -
-        valueFrom('f43'),
-        0
-      );
+const generator =
+  valueFrom('f35') +
+  valueFrom('f44') +
+  valueFrom('f45');
 
     const s =
       document.getElementById(

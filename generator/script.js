@@ -1205,24 +1205,19 @@ function calculate(){
   const largestMotor =
     largestMotorCalculation();
 
-  /* NEC 2023 Optional Method:
-     EVSE and largest-motor adder
-     are included before demand
-     is applied. */
+   /* NEC 2023 Optional Method:
+     Demand applies only to
+     General + Appliance loads. */
 
   const demandLoads =
     combinedDemandCalculation(
       generalLoad,
       {
         service:
-          applianceLoads.service +
-          continuousLoads.evService +
-          largestMotor.additionalVA,
+          applianceLoads.service,
 
         generator:
-          applianceLoads.generator +
-          continuousLoads.evGenerator +
-          largestMotor.additionalVA
+          applianceLoads.generator
       }
     );
 
@@ -1234,22 +1229,16 @@ function calculate(){
       ? window.hvacLoadCalculation()
       : hvacLoadCalculation();
 
-  /* EVSE and largest-motor adder
-     already included above. */
+/* HVAC and all Continuous Loads
+   are added after demand. */
 
-  const serviceHVACContinuous =
-    hvacLoads.service +
-    (
-      continuousLoads.service -
-      continuousLoads.evService
-    );
+const serviceHVACContinuous =
+  hvacLoads.service +
+  continuousLoads.service;
 
-  const generatorHVACContinuous =
-    hvacLoads.generator +
-    (
-      continuousLoads.generator -
-      continuousLoads.evGenerator
-    );
+const generatorHVACContinuous =
+  hvacLoads.generator +
+  continuousLoads.generator;
 
   setOutput(
     "e44",

@@ -7,7 +7,21 @@ function out(id){const el=document.getElementById(id);if(!el)return 0;const n=Nu
 function qty(id){const el=document.getElementById(id);const n=Math.floor(Number(el?el.value:0)||0);return n>0?n:0}
 function value(id){const el=document.getElementById(id);return el?String(el.value||'').trim():''}
 function vaForRow(row){if(row===5)return 3;if(row===6||row===7)return 1500;const n=Number(value('v'+row));return Number.isFinite(n)&&n>0?n:0}
-function managedForRow(row){if(typeof managedQuantity==='function')return managedQuantity(row);return 0}
+function readPrintJSON(key,fallback){try{const parsed=JSON.parse(localStorage.getItem(key)||'');return parsed&&typeof parsed==='object'?parsed:fallback}catch(e){return fallback}}
+function hvacManagedForKind(kind){
+  const methods=readPrintJSON('loadcalcpro_hvac_selected_methods_v1',[]),data=readPrintJSON('loadcalcpro_hvac_method_sections_v57',{}),managed=readPrintJSON('loadcalcpro_hvac_method_managed_v57',{}),counts=readPrintJSON('loadcalcpro_hvac_visible_system_counts_v522',{});
+  if(!Array.isArray(methods))return 0;
+  let total=0;
+  methods.filter(method=>['central65','separate40','heatpump'].includes(method)).forEach(method=>{
+    const count=Math.max(1,Math.min(3,Math.floor(Number(counts[method])||1)));
+    for(let i=1;i<=count;i++){
+      const type=kind+(i===1?'':i),key=method+'_'+type,item=data[key]||{},entered=Math.max(0,Math.floor(Number(item.qty)||0)),raw=managed[key],selected=raw===true?entered:Math.floor(Number(raw)||0);
+      total+=Math.max(0,Math.min(entered,Number.isFinite(selected)?selected:0));
+    }
+  });
+  return total;
+}
+function managedForRow(row){if(row===37)return hvacManagedForKind('ac');if(row===38)return hvacManagedForKind('heat');if(typeof managedQuantity==='function')return managedQuantity(row);return 0}
 function managedMarker(row){const managed=managedForRow(row);return managed>0?managed:''}
 function generalTotal(){return Math.max(Number(value('q5'))||0,0)*3+Math.max(qty('q6'),0)*1500+Math.max(qty('q7'),0)*1500}
 function applianceTotals(){let service=0,generator=0;for(let row=10;row<=30;row++){service+=out('e'+row);generator+=out('f'+row)}return{service,generator}}

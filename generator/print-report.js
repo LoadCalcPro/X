@@ -8,10 +8,10 @@ function qty(id){const el=document.getElementById(id);const n=Math.floor(Number(
 function value(id){const el=document.getElementById(id);return el?String(el.value||'').trim():''}
 function vaForRow(row){if(row===5)return 3;if(row===6||row===7)return 1500;const n=Number(value('v'+row));return Number.isFinite(n)&&n>0?n:0}
 function managedForRow(row){if(typeof managedQuantity==='function')return managedQuantity(row);return 0}
-function generatorQuantity(row){const total=qty('q'+row);const managed=managedForRow(row);return managed>0?Math.max(total-managed,0):''}
+function managedMarker(row){const managed=managedForRow(row);return managed>0?managed:''}
 function generalTotal(){return Math.max(Number(value('q5'))||0,0)*3+Math.max(qty('q6'),0)*1500+Math.max(qty('q7'),0)*1500}
 function applianceTotals(){let service=0,generator=0;for(let row=10;row<=30;row++){service+=out('e'+row);generator+=out('f'+row)}return{service,generator}}
-function generatorCell(generator,row){const remaining=row?generatorQuantity(row):'';const marker=remaining!==''?'<span class="generator-qty" title="Generator quantity">'+esc(remaining)+'</span>':'';return '<td class="number generator-number">'+marker+'<span class="generator-value">'+num(generator)+'</span></td>'}
+function generatorCell(generator,row){const managed=row?managedMarker(row):'';const marker=managed!==''?'<span class="generator-qty" title="Managed quantity">'+esc(managed)+'</span>':'';return '<td class="number generator-number">'+marker+'<span class="generator-value">'+num(generator)+'</span></td>'}
 function loadRow(label,quantity,va,service,generator,row,className){if(Number(service)<=0&&Number(generator)<=0)return '';return '<tr class="'+(className||'normal-load-row')+'"><td>'+esc(label)+'</td><td class="quantity">'+(quantity?esc(quantity):'')+'</td><td class="number va-number">'+(Number(va)>0?num(va):'')+'</td><td class="number">'+num(service)+'</td>'+generatorCell(generator,row)+'</tr>'}
 function totalRow(label,service,generator,className){return '<tr class="'+(className||'subtotal-row')+'"><td><strong>'+esc(label)+'</strong></td><td></td><td></td><td class="number"><strong>'+num(service)+'</strong></td><td class="number"><strong>'+num(generator)+'</strong></td></tr>'}
 function sectionRow(label){return '<tr class="print-section-row"><td colspan="5">'+esc(label)+'</td></tr>'}

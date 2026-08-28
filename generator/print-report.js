@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-function esc(value){return String(value===null||value===undefined?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+function esc(value){return String(value===null||value===undefined?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;')}
 function num(value){const n=Math.round(Number(value)||0);return n.toLocaleString('en-US')}
 function out(id){const el=document.getElementById(id);if(!el)return 0;const n=Number(String(el.textContent||'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0}
 function qty(id){const el=document.getElementById(id);const n=Math.floor(Number(el?el.value:0)||0);return n>0?n:0}
@@ -46,7 +46,7 @@ function installStyle(){
   .print-page.compact{width:58%!important;margin-left:.10in!important;margin-right:auto!important}
   .generator-print-heading{margin:0 0 7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
   .print-brand{display:block!important;margin:0 0 2px!important;font-size:13px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
-  .print-brand-main{color:#17377f!important}.print-brand-accent{margin-left:2px!important;color:#0f766e!important}
+  .print-brand-main{color:#17377f!important}.print-brand-accent{margin-left:0!important;color:#0f766e!important}
   .print-title-text{display:block!important;color:#222!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
   .print-page.calculation-only .print-brand{display:none!important}
   .print-page.calculation-only .print-title-text{font-size:10px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.02em!important}

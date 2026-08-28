@@ -39,5 +39,25 @@
 <script src="motor-contribution.js"></script>
 <script src="aic-display.js"></script>
 <script src="drawing-output.js"></script>
+<script>
+(function(){
+  const frame=document.getElementById('aicFrame');
+  const printType=document.getElementById('outerPrintType');
+  const printButton=document.getElementById('printBtn');
+  function syncPrintBranding(){
+    let d;
+    try{d=frame.contentDocument||frame.contentWindow.document}catch(e){return}
+    if(!d)return;
+    let style=d.getElementById('aicPrintBrandingOverride');
+    if(!style){style=d.createElement('style');style.id='aicPrintBrandingOverride';d.head.appendChild(style)}
+    style.textContent=printType.value==='calculation'
+      ? '@media print{#printPages .aic-print-heading .print-brand{display:none!important}}'
+      : '';
+  }
+  printType.addEventListener('change',syncPrintBranding);
+  printButton.addEventListener('click',syncPrintBranding,true);
+  frame.addEventListener('load',syncPrintBranding);
+})();
+</script>
 </body>
 </html>

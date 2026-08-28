@@ -126,6 +126,9 @@
   .load-name,input.editable-load-name,.descInput{font-size:var(--ui-description-size-desktop)!important;line-height:1.25!important;font-weight:var(--ui-medium)!important}
   .input-block input,.input-block select,.load-inputs.inline-load-row .input-block input,.field input,.field select{font-size:var(--ui-input-size-desktop)!important;line-height:1.25!important;font-weight:var(--ui-regular)!important}
 
+  /* Demand values use fixed numeric lanes so four-digit values do not visually drift toward the Generator column. */
+  .demand-row .demand-service,.demand-row .demand-generator{display:block!important;width:96px!important;min-width:96px!important;font-variant-numeric:tabular-nums!important;text-align:right!important}
+
   /* One authoritative six-column grid. HVAC outputs participate directly in
      the same parent grid as Appliance and Continuous Loads. */
   .card:has(#applianceRows) .v3-column-header,#applianceRows .load-row,#v57HvacMethodSections .section-column-header,#v57HvacMethodSections .v57-method-row,.continuous-loads-card .v3-column-header,.continuous-loads-card .section-column-header,.continuous-loads-card .load-row{grid-template-columns:var(--load-entry-grid)!important}

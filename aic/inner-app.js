@@ -149,22 +149,9 @@ function calculate(n) {
   carryForward(n, AIC);
 }
 
-function carryForward(n, aicValue=null) {
-  if (n !== 1) return;
-
-  const nextFault = el('utilityFault', 2);
-  if (!nextFault) return;
-
-  let value = aicValue;
-  if (!Number.isFinite(value)) {
-    const text = el('aicResult', 1).textContent.replace(/,/g, '');
-    value = Number(text);
-  }
-
-  nextFault.dataset.userEdited = 'false';
-  nextFault.value = Number.isFinite(value) ? Math.round(value).toString() : '';
-  calculate(2);
-}
+/* Downstream fault-current inputs are independent. Do not automatically
+   carry the calculated AIC from the first calculation into panel 1. */
+function carryForward() {}
 
 function populateWireSizes(select) {
   select.innerHTML = '<option value="">Select wire size</option>' +
@@ -186,7 +173,7 @@ function createPanel(n) {
     <div class="form-grid">
       <label for="utilityFault${n}">I = Fault Current</label>
       <input id="utilityFault${n}" type="text" inputmode="decimal"
-        placeholder="${n === 2 ? 'Fault current from first calculation' : 'Enter fault current'}">
+        placeholder="Enter fault current">
       <label for="conduit${n}">Conduit type</label>
       <select id="conduit${n}"><option value="">Select conduit type</option><option>Non-metallic</option><option>Metallic</option></select>
       <label for="wireType${n}">Wire type</label>
@@ -223,7 +210,7 @@ function attachPanelEvents(n) {
   );
 
   const fault = el('utilityFault', n);
-  if (n > 2) {
+  if (n > 1) {
     fault.addEventListener('input', () => {
       fault.dataset.userEdited = fault.value.trim() === '' ? 'false' : 'true';
     });
@@ -251,17 +238,8 @@ function resetCalculator(n) {
 
   ['conduit','wireType','wireSize','distance','volts','conductors','phase'].forEach(base => el(base,n).value = '');
 
-  if (n === 1) {
-    el('utilityFault',1).value = '';
-  } else if (n === 2) {
-    el('utilityFault',2).dataset.userEdited = 'false';
-    const firstText = el('aicResult', 1).textContent.replace(/,/g, '');
-    const firstAic = Number(firstText);
-    el('utilityFault',2).value = Number.isFinite(firstAic) ? Math.round(firstAic).toString() : '';
-  } else {
-    el('utilityFault',n).dataset.userEdited = 'true';
-    el('utilityFault',n).value = '';
-  }
+  el('utilityFault',n).value = '';
+  if (n > 1) el('utilityFault',n).dataset.userEdited = 'false';
 
   el('cConstant', n).textContent = '—';
   clearAicResult(n);
@@ -290,15 +268,8 @@ function addPanel(save=true) {
   if (next > MAX_PANELS) return;
   createPanel(next);
 
-  if (next === 2) {
-    const previousText = el('aicResult', 1).textContent.replace(/,/g, '');
-    const previousAic = Number(previousText);
-    el('utilityFault', 2).value = Number.isFinite(previousAic) ? Math.round(previousAic).toString() : '';
-    el('utilityFault', 2).dataset.userEdited = 'false';
-  } else {
-    el('utilityFault', next).value = '';
-    el('utilityFault', next).dataset.userEdited = 'true';
-  }
+  el('utilityFault', next).value = '';
+  el('utilityFault', next).dataset.userEdited = 'false';
 
   updateAllSelectPlaceholders();
   updatePanelControls();
@@ -320,7 +291,7 @@ function hasCalculationData(n) {
     if (String(el('calculationHeading',n).value || '').trim() !== '') return true;
   }
 
-  return ['conduit','wireType','wireSize','distance','volts','conductors','phase']
+  return ['utilityFault','conduit','wireType','wireSize','distance','volts','conductors','phase']
     .some(base => String(el(base,n).value || '').trim() !== '');
 }
 
@@ -414,10 +385,9 @@ let pendingSavedAicData = null;
 
 function hasMeaningfulSavedValues(saved) {
   if (!saved || !saved.values || typeof saved.values !== 'object') return false;
-  return Object.entries(saved.values).some(([id, value]) => {
-    if (id === 'utilityFault2') return false;
-    return String(value || '').trim() !== '';
-  });
+  return Object.entries(saved.values).some(([, value]) =>
+    String(value || '').trim() !== ''
+  );
 }
 
 function applySavedValues(saved) {
@@ -425,17 +395,13 @@ function applySavedValues(saved) {
   while (panelCount() < wantedCount) addPanel(false);
 
   Object.entries(saved.values || {}).forEach(([id,value]) => {
-    if (id === 'utilityFault2') return;
     const node = document.getElementById(id);
     if (node) node.value = value;
   });
 
   for (let n = 2; n <= panelCount(); n++) {
-    if (n === 2) {
-      el('utilityFault',2).dataset.userEdited = 'false';
-    } else {
-      el('utilityFault',n).dataset.userEdited = 'true';
-    }
+    const fault = el('utilityFault',n);
+    if (fault) fault.dataset.userEdited = fault.value.trim() === '' ? 'false' : 'true';
   }
 
   updateAllSelectPlaceholders();

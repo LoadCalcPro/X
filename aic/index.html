@@ -54,7 +54,39 @@
 <div class="frame-wrap"><iframe id="aicFrame" src="../aic_calculator.html?v=20260828-3" title="LoadCalcPro X AIC Calculator"></iframe></div>
 </div>
 <script src="app.js?v=20260827-1"></script>
-<script src="motor-contribution.js"></script>
+<script src="motor-contribution.js?v=20260828-2"></script>
+<script>
+(function(){
+  const frame=document.getElementById('aicFrame');
+  function installIndependentDownstreamGuard(){
+    let d,w;
+    try{d=frame.contentDocument||frame.contentWindow.document;w=frame.contentWindow}catch(e){return}
+    if(!d||!w)return;
+    const mainResult=d.getElementById('aicResult');
+    if(!mainResult||mainResult.__downstreamGuardInstalled)return;
+    mainResult.__downstreamGuardInstalled=true;
+    const clearLegacyCarry=function(){
+      const next=d.getElementById('utilityFault2');
+      if(!next)return;
+      if(next.dataset.userEdited==='false'&&String(next.value||'').trim()!==''){
+        next.value='';
+        try{if(typeof w.calculate==='function')w.calculate(2)}catch(e){}
+        try{if(typeof w.saveCurrentValues==='function')w.saveCurrentValues()}catch(e){}
+      }
+    };
+    new MutationObserver(()=>queueMicrotask(clearLegacyCarry)).observe(mainResult,{childList:true,characterData:true,subtree:true});
+    d.addEventListener('input',function(event){
+      if(event.target&&event.target.id==='utilityFault2')event.target.dataset.userEdited=event.target.value.trim()===''?'false':'true';
+    },true);
+    setTimeout(clearLegacyCarry,0);
+  }
+  frame.addEventListener('load',function(){
+    installIndependentDownstreamGuard();
+    setTimeout(installIndependentDownstreamGuard,150);
+    setTimeout(installIndependentDownstreamGuard,700);
+  });
+})();
+</script>
 <script src="aic-display.js"></script>
 <script src="drawing-output.js"></script>
 <script>

@@ -6,10 +6,17 @@
   <meta name="robots" content="noindex,nofollow">
   <title>LoadCalcPro X | AIC Calculator</title>
   <link rel="stylesheet" href="aic/inner-styles.css">
-  <style>
-    body.access-locked .restore-modal.show { visibility:hidden; }
-  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    if (window.self !== window.top) document.documentElement.classList.add('aic-embedded');
+  </script>
+  <style>
+    @media screen {
+      html.aic-embedded body:not(.restore-positioned) .restore-modal.show {
+        display:none!important;
+      }
+    }
+  </style>
 </head>
 <body class="access-locked">
 

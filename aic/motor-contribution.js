@@ -331,14 +331,6 @@
     result.textContent=Math.round(total).toLocaleString();
     const work=formulaCalculationHtml(d,n,base,contribution,total);
     if(work)details.insertAdjacentHTML('beforeend',work);
-    if(n===1){
-      const next=d.getElementById('utilityFault2');
-      if(next){
-        next.dataset.userEdited='false';
-        next.value=Math.round(total).toString();
-        setTimeout(()=>{try{if(typeof w.calculate==='function')w.calculate(2)}catch(e){}},0);
-      }
-    }
   }
   function installCalculationWrapper(){
     const w=innerWin(),d=innerDoc();

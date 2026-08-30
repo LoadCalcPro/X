@@ -25,12 +25,77 @@ function managedForRow(row){if(row===37)return hvacManagedForKind('ac');if(row==
 function managedMarker(row){const managed=managedForRow(row);return managed>0?managed:''}
 function generalTotal(){return Math.max(Number(value('q5'))||0,0)*3+Math.max(qty('q6'),0)*1500+Math.max(qty('q7'),0)*1500}
 function applianceTotals(){let service=0,generator=0;for(let row=10;row<=30;row++){service+=out('e'+row);generator+=out('f'+row)}return{service,generator}}
-function generatorCell(generator,row){const managed=row?managedMarker(row):'';const marker=managed!==''?'<span class="generator-qty" title="Managed quantity">'+esc(managed)+'</span>':'';return '<td class="number generator-number">'+marker+'<span class="generator-value">'+num(generator)+'</span></td>'}
-function loadRow(label,quantity,va,service,generator,row,className){if(Number(service)<=0&&Number(generator)<=0)return '';return '<tr class="'+(className||'normal-load-row')+'"><td>'+esc(label)+'</td><td class="quantity">'+(quantity?esc(quantity):'')+'</td><td class="number va-number">'+(Number(va)>0?num(va):'')+'</td><td class="number">'+num(service)+'</td>'+generatorCell(generator,row)+'</tr>'}
+function generatorCell(generator,row,managedOverride){const managed=managedOverride===undefined?(row?managedMarker(row):''):managedOverride;const marker=managed!==''&&Number(managed)>0?'<span class="generator-qty" title="Managed quantity">'+esc(managed)+'</span>':'';return '<td class="number generator-number">'+marker+'<span class="generator-value">'+num(generator)+'</span></td>'}
+function loadRow(label,quantity,va,service,generator,row,className,managedOverride){if(Number(service)<=0&&Number(generator)<=0)return '';return '<tr class="'+(className||'normal-load-row')+'"><td>'+esc(label)+'</td><td class="quantity">'+(quantity?esc(quantity):'')+'</td><td class="number va-number">'+(Number(va)>0?num(va):'')+'</td><td class="number">'+num(service)+'</td>'+generatorCell(generator,row,managedOverride)+'</tr>'}
 function totalRow(label,service,generator,className){return '<tr class="'+(className||'subtotal-row')+'"><td><strong>'+esc(label)+'</strong></td><td></td><td></td><td class="number"><strong>'+num(service)+'</strong></td><td class="number"><strong>'+num(generator)+'</strong></td></tr>'}
 function sectionRow(label){return '<tr class="print-section-row"><td colspan="5">'+esc(label)+'</td></tr>'}
 function applianceLabel(item){if(typeof applianceDescription==='function')return applianceDescription(item.row,item.label);return item.label||''}
 function hvacLabel(row){if(typeof window.getHVACRowLabel==='function')return window.getHVACRowLabel(row);return row===37||row===39?'Air Conditioning':'Heating'}
+function buildHVACRows(){
+  const methods=readPrintJSON('loadcalcpro_hvac_selected_methods_v1',[]);
+  const data=readPrintJSON('loadcalcpro_hvac_method_sections_v57',{});
+  const managed=readPrintJSON('loadcalcpro_hvac_method_managed_v57',{});
+  const counts=readPrintJSON('loadcalcpro_hvac_visible_system_counts_v522',{});
+  const hpAnswers=readPrintJSON('loadcalcpro_hvac_heatpump_answers_v543',{});
+  const legacyHp=localStorage.getItem('loadcalcpro_hvac_multi_hp_answer_v1')||'';
+  if(!Array.isArray(methods)||!methods.length)return '';
+
+  function count(method){return Math.max(1,Math.min(3,Math.floor(Number(counts[method])||1)))}
+  function type(kind,index){return kind+(index===1?'':index)}
+  function item(method,kind,index){return data[method+'_'+type(kind,index)]||{}}
+  function itemQty(method,kind,index){return Math.max(0,Math.floor(Number(item(method,kind,index).qty)||0))}
+  function itemVA(method,kind,index){return Math.max(0,Number(item(method,kind,index).va)||0)}
+  function managedQty(method,kind,index){
+    const entered=itemQty(method,kind,index);
+    const raw=managed[method+'_'+type(kind,index)];
+    const selected=raw===true?entered:Math.floor(Number(raw)||0);
+    return Math.max(0,Math.min(entered,Number.isFinite(selected)?selected:0));
+  }
+  function total(method,kind,index,generator){
+    const q=Math.max(0,itemQty(method,kind,index)-(generator?managedQty(method,kind,index):0));
+    return q*itemVA(method,kind,index);
+  }
+  function aggregate(method,kind,generator){
+    let sum=0;for(let i=1;i<=count(method);i++)sum+=total(method,kind,i,generator);return sum;
+  }
+  function heatFactor(method){
+    if(method!=='separate40')return .65;
+    let heatQuantity=0;for(let i=1;i<=count(method);i++)heatQuantity+=itemQty(method,'heat',i);
+    return heatQuantity>=4?.40:.65;
+  }
+  function add(method,kind,index,label,factor){
+    const q=itemQty(method,kind,index),va=itemVA(method,kind,index);
+    if(!q||!va)return '';
+    return loadRow(label,q,va,q*va*factor,(q-managedQty(method,kind,index))*va*factor,null,'normal-load-row',managedQty(method,kind,index));
+  }
+
+  let html='';
+  methods.filter(method=>['central65','separate40','heatpump'].includes(method)).forEach(method=>{
+    const factor=heatFactor(method);
+    if(method==='heatpump'){
+      for(let i=1;i<=count(method);i++){
+        const answer=String(hpAnswers[i]||hpAnswers[String(i)]||legacyHp);
+        const cooling=total(method,'ac',i,false),heating=total(method,'heat',i,false)*.65;
+        if(answer==='yes'){
+          html+=add(method,'ac',i,'Heat Pump Compressor '+i,1);
+          html+=add(method,'heat',i,'Supplemental Electric Heat '+i+' at 65%',.65);
+        }else if(answer==='no'){
+          html+=cooling>=heating
+            ?add(method,'ac',i,'Heat Pump Compressor '+i,1)
+            :add(method,'heat',i,'Supplemental Electric Heat '+i+' at 65%',.65);
+        }
+      }
+      return;
+    }
+    const cooling=aggregate(method,'ac',false),heating=aggregate(method,'heat',false)*factor;
+    const kind=cooling>=heating?'ac':'heat';
+    for(let i=1;i<=count(method);i++){
+      if(kind==='ac')html+=add(method,'ac',i,'Air Conditioning'+(count(method)>1?' Unit '+i:''),1);
+      else html+=add(method,'heat',i,'Heating'+(count(method)>1?' Unit '+i:'')+' at '+Math.round(factor*100)+'%',factor);
+    }
+  });
+  return html;
+}
 function printType(){return document.getElementById('generatorPrintType')?.value||'branded'}
 function printLayout(){return document.getElementById('generatorPrintLayout')?.value||'full'}
 
@@ -97,7 +162,7 @@ window.updatePrintRows=function(data){
   body+='<tr class="demand-breakdown-row"><td>First 10,000 at 100%</td><td></td><td></td><td class="number">'+num(serviceFirst)+'</td><td class="number">'+num(generatorFirst)+'</td></tr>';
   body+='<tr class="demand-breakdown-row"><td>Remainder at 40%</td><td></td><td></td><td class="number">'+num(serviceRemainder)+'</td><td class="number">'+num(generatorRemainder)+'</td></tr>';
   body+=totalRow('Demand Total',data.demandLoads.service,data.demandLoads.generator,'demand-total-row');
-  const hvacRows=[37,38,39,40].map(row=>loadRow(hvacLabel(row),qty('q'+row),vaForRow(row),out('e'+row),out('f'+row),row)).join('');if(hvacRows)body+=sectionRow('HVAC Load')+hvacRows;
+  let hvacRows=buildHVACRows();if(!hvacRows)hvacRows=[37,38,39,40].map(row=>loadRow(hvacLabel(row),qty('q'+row),vaForRow(row),out('e'+row),out('f'+row),row)).join('');if(hvacRows)body+=sectionRow('HVAC Load')+hvacRows;
   let continuousRows='';continuousRows+=loadRow('EV Charger',qty('q43'),vaForRow(43),out('e43'),out('f43'),43);
   continuousRows+=loadRow(value('d47')||'Additional Continuous Load (100%)',qty('q47'),vaForRow(47),out('e47'),out('f47'),47);
   continuousRows+=loadRow(value('d42')||'Additional Continuous Load (125%)',qty('q42'),vaForRow(42),out('e42'),out('f42'),42);

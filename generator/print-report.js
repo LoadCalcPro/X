@@ -117,8 +117,8 @@ function installStyle(){
   .print-page.calculation-only .print-title-text{font-size:10px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.02em!important}
   .print-project{display:grid!important;grid-template-columns:1fr 1fr!important;gap:3px 12px!important;margin:0 0 5px!important;padding:0 0 5px!important;border-bottom:1px solid #c7cdd4!important;color:#222!important;font-size:10px!important;line-height:1.3!important}
   .print-table{width:100%!important;margin:0!important;border-collapse:collapse!important;table-layout:fixed!important}
-  .print-table th,.print-table td{height:22px!important;padding:3px 5px!important;border:1px solid #cfd4da!important;color:#222!important;font-size:9.4px!important;line-height:1.2!important;vertical-align:middle!important}
-  .print-table thead th{background:#e8edf3!important;color:#17365d!important;border-top:1.2px solid #6b7280!important;border-bottom:1.2px solid #6b7280!important;font-size:9px!important;font-weight:900!important;text-align:center!important}
+  .print-table th,.print-table td{height:22px!important;padding:3px 5px!important;border-top:1px solid #cfd4da!important;border-bottom:1px solid #cfd4da!important;border-left:0!important;border-right:0!important;color:#222!important;font-size:9.4px!important;line-height:1.2!important;vertical-align:middle!important}
+  .print-table thead th{background:#e8edf3!important;color:#17365d!important;border-top:1.2px solid #6b7280!important;border-bottom:1.2px solid #6b7280!important;font-size:9.4px!important;font-weight:700!important;text-transform:none!important;letter-spacing:normal!important;text-align:center!important}
   .print-table th:first-child,.print-table td:first-child{width:38%!important;text-align:left!important}
   .print-table th:nth-child(2),.print-table td:nth-child(2){width:10%!important;text-align:center!important}
   .print-table th:nth-child(3),.print-table td:nth-child(3){width:12%!important;text-align:right!important}
@@ -128,15 +128,15 @@ function installStyle(){
   .print-page.compact .print-project{font-size:8px!important;gap:2px 8px!important}
   .print-table .normal-load-row td{background:#fff!important;color:#222!important;font-weight:400!important}
   .print-table .normal-load-row td.number,.print-table .normal-load-row td.quantity{color:#222!important;font-weight:400!important}
-  .print-table .print-section-row td{background:#e8edf3!important;color:#17365d!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.02em!important;text-align:left!important}
-  .print-table .subtotal-row td,.print-table .demand-total-row td,.print-table .hvac-continuous-total-row td{background:#f7f7f7!important;color:#222!important;font-weight:800!important}
+  .print-table .print-section-row td{background:#e8edf3!important;color:#17365d!important;font-weight:700!important;text-transform:none!important;letter-spacing:normal!important;text-align:left!important}
+  .print-table .subtotal-row td,.print-table .demand-total-row td,.print-table .hvac-continuous-total-row td{background:#fff!important;color:#222!important;font-weight:700!important}
   .print-table .demand-breakdown-row td{background:#fff!important;color:#222!important;font-weight:400!important}
   .generator-number{position:relative!important;white-space:nowrap!important}
   .generator-qty{float:left!important;min-width:15px!important;margin-left:1px!important;margin-right:7px!important;padding:1px 3px!important;border:1px solid #94a3b8!important;border-radius:3px!important;text-align:center!important;font-size:7.5px!important;line-height:1.05!important;font-weight:700!important;color:#222!important;background:#fff!important}
   .generator-value{float:right!important}
-  .print-table .managed-quantity-row td{background:#fff!important;color:#222!important;border-top:1px solid #94a3b8!important;font-weight:800!important}
+  .print-table .managed-quantity-row td{background:#fff!important;color:#222!important;border-top:1px solid #94a3b8!important;font-weight:700!important}
   .print-table .managed-quantity-row .managed-total-value{text-align:right!important}
-  .print-table .final-total-row td,.print-table .final-amps-row td{background:#fff!important;color:#222!important;border-top:1.5px solid #4b5563!important;font-weight:900!important}
+  .print-table .final-total-row td,.print-table .final-amps-row td{background:#fff!important;color:#222!important;border-top:1.5px solid #4b5563!important;font-weight:700!important}
   .print-table .print-box-row>td:first-child,.print-table .print-box-row>th:first-child{border-left:1.6px solid #1e3a8a!important}
   .print-table .print-box-row>td:last-child,.print-table .print-box-row>th:last-child{border-right:1.6px solid #1e3a8a!important}
   .print-table .print-box-start>*{border-top:1.6px solid #1e3a8a!important}

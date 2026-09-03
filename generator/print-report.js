@@ -110,25 +110,25 @@ function installStyle(){
   .print-page{width:84%!important;margin:0 auto!important;padding:.14in!important;border:.6pt solid #cbd5e1!important;box-sizing:border-box!important;background:#fff!important}
   .print-page.compact{width:58%!important;margin-left:.10in!important;margin-right:auto!important}
   .generator-print-heading{margin:0 0 7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
-  .print-brand{display:block!important;margin:0 0 2px!important;font-size:13px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
+  .print-brand{display:block!important;margin:0 0 2px!important;font-size:14px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
   .print-brand-main{color:#17377f!important}.print-brand-accent{margin-left:0!important;color:#0f766e!important}
-  .print-title-text{display:block!important;color:#222!important;font-size:9px!important;line-height:1.15!important;font-weight:700!important}
+  .print-title-text{display:block!important;color:#222!important;font-size:10px!important;line-height:1.15!important;font-weight:700!important}
   .print-page.calculation-only .print-brand{display:none!important}
   .print-page.calculation-only .print-title-text{font-size:10px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.02em!important}
-  .print-project{display:grid!important;grid-template-columns:1fr 1fr!important;gap:3px 12px!important;margin:0 0 5px!important;padding:0 0 5px!important;border-bottom:1px solid #c7cdd4!important;color:#222!important;font-size:9px!important;line-height:1.25!important}
+  .print-project{display:grid!important;grid-template-columns:1fr 1fr!important;gap:3px 12px!important;margin:0 0 5px!important;padding:0 0 5px!important;border-bottom:1px solid #c7cdd4!important;color:#222!important;font-size:10px!important;line-height:1.3!important}
   .print-table{width:100%!important;margin:0!important;border-collapse:collapse!important;table-layout:fixed!important}
-  .print-table th,.print-table td{height:20px!important;padding:2px 4px!important;border:1px solid #cfd4da!important;color:#222!important;font-size:8.4px!important;line-height:1.15!important;vertical-align:middle!important}
-  .print-table thead th{background:#f3f4f6!important;color:#222!important;border-top:1.2px solid #6b7280!important;border-bottom:1.2px solid #6b7280!important;font-size:8px!important;font-weight:800!important;text-align:center!important}
+  .print-table th,.print-table td{height:22px!important;padding:3px 5px!important;border:1px solid #cfd4da!important;color:#222!important;font-size:9.4px!important;line-height:1.2!important;vertical-align:middle!important}
+  .print-table thead th{background:#e8edf3!important;color:#17365d!important;border-top:1.2px solid #6b7280!important;border-bottom:1.2px solid #6b7280!important;font-size:9px!important;font-weight:900!important;text-align:center!important}
   .print-table th:first-child,.print-table td:first-child{width:38%!important;text-align:left!important}
   .print-table th:nth-child(2),.print-table td:nth-child(2){width:10%!important;text-align:center!important}
   .print-table th:nth-child(3),.print-table td:nth-child(3){width:12%!important;text-align:right!important}
   .print-table th:nth-child(4),.print-table td:nth-child(4){width:19%!important;text-align:right!important}
   .print-table th:nth-child(5),.print-table td:nth-child(5){width:21%!important;text-align:right!important}
-  .print-page.compact .print-table th,.print-page.compact .print-table td{font-size:7.6px!important;padding:2px 3px!important}
+  .print-page.compact .print-table th,.print-page.compact .print-table td{font-size:8.4px!important;padding:2px 3px!important}
   .print-page.compact .print-project{font-size:8px!important;gap:2px 8px!important}
   .print-table .normal-load-row td{background:#fff!important;color:#222!important;font-weight:400!important}
   .print-table .normal-load-row td.number,.print-table .normal-load-row td.quantity{color:#222!important;font-weight:400!important}
-  .print-table .print-section-row td{background:#e8edf3!important;color:#222!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.02em!important;text-align:left!important}
+  .print-table .print-section-row td{background:#e8edf3!important;color:#17365d!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.02em!important;text-align:left!important}
   .print-table .subtotal-row td,.print-table .demand-total-row td,.print-table .hvac-continuous-total-row td{background:#f7f7f7!important;color:#222!important;font-weight:800!important}
   .print-table .demand-breakdown-row td{background:#fff!important;color:#222!important;font-weight:400!important}
   .generator-number{position:relative!important;white-space:nowrap!important}
@@ -137,8 +137,35 @@ function installStyle(){
   .print-table .managed-quantity-row td{background:#fff!important;color:#222!important;border-top:1px solid #94a3b8!important;font-weight:800!important}
   .print-table .managed-quantity-row .managed-total-value{text-align:right!important}
   .print-table .final-total-row td,.print-table .final-amps-row td{background:#fff!important;color:#222!important;border-top:1.5px solid #4b5563!important;font-weight:900!important}
+  .print-table .print-box-row>td:first-child,.print-table .print-box-row>th:first-child{border-left:1.6px solid #1e3a8a!important}
+  .print-table .print-box-row>td:last-child,.print-table .print-box-row>th:last-child{border-right:1.6px solid #1e3a8a!important}
+  .print-table .print-box-start>*{border-top:1.6px solid #1e3a8a!important}
+  .print-table .print-box-end>*{border-bottom:1.6px solid #1e3a8a!important}
   .print-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
 }`;document.head.appendChild(style)
+}
+
+function markPrintBox(rows){
+  if(!rows.length)return;
+  rows.forEach(row=>row.classList.add('print-box-row'));
+  rows[0].classList.add('print-box-start');
+  rows[rows.length-1].classList.add('print-box-end');
+}
+
+function decoratePrintGroups(report){
+  const table=report.querySelector('.print-table');if(!table)return;
+  const heading=table.querySelector('thead tr');
+  const firstHeading=heading&&heading.querySelector('th:first-child');
+  if(firstHeading)firstHeading.textContent='General + Appliance Loads';
+  const rows=Array.from(table.querySelectorAll('tbody tr'));
+  const sectionIndex=label=>rows.findIndex(row=>row.classList.contains('print-section-row')&&row.textContent.trim().toLowerCase()===label.toLowerCase());
+  const classIndex=name=>rows.findIndex(row=>row.classList.contains(name));
+  const demand=sectionIndex('Demand Load'),hvac=sectionIndex('HVAC Load'),continuous=sectionIndex('Continuous Loads'),totals=classIndex('final-total-row');
+  const hvacContinuous=[hvac,continuous].filter(index=>index>=0).sort((a,b)=>a-b)[0];
+  markPrintBox([...(heading?[heading]:[]),...rows.slice(0,demand>=0?demand:rows.length)]);
+  if(demand>=0)markPrintBox(rows.slice(demand,hvacContinuous===undefined?(totals>=0?totals:rows.length):hvacContinuous));
+  if(hvacContinuous!==undefined)markPrintBox(rows.slice(hvacContinuous,totals>=0?totals:rows.length));
+  if(totals>=0)markPrintBox(rows.slice(totals));
 }
 
 window.updatePrintRows=function(data){
@@ -178,7 +205,8 @@ window.updatePrintRows=function(data){
     ? '<div class="generator-print-heading"><div class="print-title-text">Generator Optional Method Load Calculation</div></div>'
     : '<div class="generator-print-heading"><div class="print-brand"><span class="print-brand-main">LoadCalc</span><span class="print-brand-accent">Pro X</span></div><div class="print-title-text">Generator Optional Method Calculator</div></div>';
 
-  report.innerHTML='<div class="'+pageClass+'">'+heading+'<div class="print-project"><div><strong>Project:</strong> '+esc(value('projectName'))+'</div><div><strong>Project #:</strong> '+esc(value('projectNumber'))+'</div><div><strong>Address:</strong> '+esc(value('projectAddress'))+'</div><div><strong>City / State:</strong> '+esc(value('projectCityState'))+'</div><div><strong>Service Voltage:</strong> '+num(data.voltage)+' V</div></div><table class="print-table"><thead><tr><th>Description</th><th>Quantity</th><th>VA</th><th>Service Load</th><th>Generator Load</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+  report.innerHTML='<div class="'+pageClass+'">'+heading+'<div class="print-project"><div><strong>Project:</strong> '+esc(value('projectName'))+'</div><div><strong>Project #:</strong> '+esc(value('projectNumber'))+'</div><div><strong>Address:</strong> '+esc(value('projectAddress'))+'</div><div><strong>City / State:</strong> '+esc(value('projectCityState'))+'</div><div><strong>Service Voltage:</strong> '+num(data.voltage)+' V</div></div><table class="print-table"><thead><tr><th>General + Appliance Loads</th><th>Quantity</th><th>VA</th><th>Service Load</th><th>Generator Load</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+  decoratePrintGroups(report);
 };
 
 window.printCalculation=function(){

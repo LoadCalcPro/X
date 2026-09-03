@@ -382,6 +382,7 @@ function saveCurrentValues() {
 }
 
 let pendingSavedAicData = null;
+let savedCalculationPromptChecked = false;
 
 function hasMeaningfulSavedValues(saved) {
   if (!saved || !saved.values || typeof saved.values !== 'object') return false;
@@ -414,6 +415,9 @@ function hideRestoreModal() {
 }
 
 function loadSavedValues() {
+  if (savedCalculationPromptChecked) return;
+  savedCalculationPromptChecked = true;
+
   try {
     const raw = localStorage.getItem(storageKey);
     if (!raw) return;
@@ -451,7 +455,6 @@ function initialize() {
   clearAicResult(1);
 
   addPanel(false);
-  loadSavedValues();
   updateAllSelectPlaceholders();
 
   for (let n = 1; n <= panelCount(); n++) calculate(n);
@@ -488,6 +491,7 @@ async function verifyDashboardSessionAccess(token) {
 function showCalculator() {
   document.getElementById('accessGate').hidden = true;
   document.body.classList.remove('access-locked');
+  requestAnimationFrame(loadSavedValues);
 }
 
 function showAccessGate(message='') {

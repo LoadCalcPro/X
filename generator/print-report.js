@@ -110,7 +110,7 @@ function installStyle(){
   .print-page{width:84%!important;margin:0 auto!important;padding:.14in!important;border:.6pt solid #cbd5e1!important;box-sizing:border-box!important;background:#fff!important}
   .print-page.compact{width:58%!important;margin-left:.10in!important;margin-right:auto!important}
   .generator-print-heading{margin:0 0 7px!important;padding:0 0 7px!important;border-bottom:1px solid #777!important}
-  .print-brand{display:block!important;margin:0 0 2px!important;font-size:14px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
+  .print-brand{display:block!important;margin:0 0 2px!important;font-size:15.4px!important;line-height:1.05!important;font-weight:900!important;letter-spacing:0!important}
   .print-brand-main{color:#17377f!important}.print-brand-accent{margin-left:0!important;color:#0f766e!important}
   .print-title-text{display:block!important;color:#222!important;font-size:10px!important;line-height:1.15!important;font-weight:700!important}
   .print-page.calculation-only .print-brand{display:none!important}

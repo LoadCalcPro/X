@@ -17,16 +17,16 @@ test('dryer minimum and table bands',()=>{
  const s=base();s.dryers=[{qty:2,va:4000},{qty:3,va:6000}];assert.equal(E.calculate(s).dryers,23800);
 });
 test('heat pump concurrent heat at 100%, one largest motor adder',()=>{
- const s=base();s.hvac=[{mode:'simultaneous',cool:3500,coolMotor:3000,heat:10000,heatMotor:0}];s.motors=[{qty:2,va:2000}];const r=E.calculate(s);assert.equal(r.hvac,13500);assert.equal(r.motorAdder,750);assert.equal(r.total,23875);
+ const s=base();s.hvac=[{mode:'simultaneous',cool:3500,heat:10000}];s.applianceMotor=3000;s.motors=[{qty:2,va:2000}];const r=E.calculate(s);assert.equal(r.hvac,13500);assert.equal(r.motorAdder,750);assert.equal(r.total,23875);
 });
-test('motor adder can make cooling govern over a larger heating base',()=>{
- const s=base();s.hvac=[{mode:'noncoincident',cool:4000,coolMotor:3600,heat:4500,heatMotor:0}];const r=E.calculate(s);assert.equal(r.hvac,4000);assert.equal(r.motorAdder,900);assert.equal(r.total,10525);
+test('included HVAC or appliance motor receives one 25% addition',()=>{
+ const s=base();s.hvac=[{mode:'noncoincident',cool:4000,heat:4500}];s.applianceMotor=3600;const r=E.calculate(s);assert.equal(r.hvac,4500);assert.equal(r.motorAdder,900);assert.equal(r.total,11025);
 });
 test('multiple HVAC systems sum independently and motor addition applies once',()=>{
- const s=base();s.hvac=[{mode:'noncoincident',cool:4000,coolMotor:3600,heat:4500,heatMotor:0},{mode:'noncoincident',cool:2000,coolMotor:1200,heat:1000,heatMotor:0}];const r=E.calculate(s);assert.equal(r.hvac,6000);assert.equal(r.motorAdder,900);
+ const s=base();s.hvac=[{mode:'noncoincident',cool:4000,heat:4500},{mode:'noncoincident',cool:2000,heat:1000}];s.applianceMotor=3600;const r=E.calculate(s);assert.equal(r.hvac,6500);assert.equal(r.motorAdder,900);
 });
 test('other larger motor may make heating govern instead',()=>{
- const s=base();s.hvac=[{mode:'noncoincident',cool:4000,coolMotor:3600,heat:4500,heatMotor:0}];s.motors=[{qty:1,va:6000}];const r=E.calculate(s);assert.equal(r.hvac,4500);assert.equal(r.motorAdder,1500);
+ const s=base();s.hvac=[{mode:'noncoincident',cool:4000,heat:4500}];s.motors=[{qty:1,va:6000}];const r=E.calculate(s);assert.equal(r.hvac,4500);assert.equal(r.motorAdder,1500);
 });
 test('EV minimum plus continuous adder and noncontinuous row',()=>{
  const s=base();s.continuous=[{qty:1,va:3000,ev:true,factor:1},{qty:2,va:1000,factor:1.25},{qty:1,va:500,factor:1}];assert.equal(E.calculate(s).continuous,10200);
@@ -38,13 +38,13 @@ test('managed EV load uses the management system maximum total',()=>{
 test('incomplete and invalid inputs cannot silently produce a final result',()=>{
  const s=base();s.appliances=[{label:'Dishwasher',qty:1,va:''}];assert.match(E.calculate(s).errors.join(' '),/Complete quantity/);
  s.appliances=[{qty:1.5,va:1000}];assert.match(E.calculate(s).errors.join(' '),/whole number/);
- s.hvac=[{mode:'',cool:3500,coolMotor:'',heat:0}];assert.match(E.calculate(s).errors.join(' '),/arrangement/);
+ s.hvac=[{mode:'',cool:3500,heat:0}];assert.match(E.calculate(s).errors.join(' '),/arrangement/);
 });
-test('HVAC calculates with optional motor fields left blank',()=>{
- const s=base();s.hvac=[{mode:'noncoincident',cool:2500,coolMotor:'',heat:8000,heatMotor:''}];const r=E.calculate(s);assert.equal(r.hvac,8000);assert.equal(r.motorAdder,0);assert.deepEqual(r.errors,[]);
+test('HVAC calculates without separate HVAC motor fields',()=>{
+ const s=base();s.hvac=[{mode:'noncoincident',cool:2500,heat:8000}];const r=E.calculate(s);assert.equal(r.hvac,8000);assert.equal(r.motorAdder,0);assert.deepEqual(r.errors,[]);
 });
 test('sample whole dwelling total and 208V conversion',()=>{
- const s=base();s.cooking=[{qty:1,va:12000}];s.dryers=[{qty:1,va:5000}];s.appliances=[{qty:1,va:1200,fixed:true},{qty:1,va:800,fixed:true},{qty:1,va:1000,fixed:true},{qty:1,va:4500,fixed:true}];s.hvac=[{mode:'noncoincident',cool:4000,coolMotor:3200,heat:5000,heatMotor:0}];s.continuous=[{qty:1,va:7200,ev:true,factor:1}];const r=E.calculate(s);assert.equal(r.total,36450);assert.equal(r.amps,151.875);assert.deepEqual(r.errors,[]);s.voltage=208;assert.equal(E.calculate(s).amps,36450/208);
+ const s=base();s.cooking=[{qty:1,va:12000}];s.dryers=[{qty:1,va:5000}];s.appliances=[{qty:1,va:1200,fixed:true},{qty:1,va:800,fixed:true},{qty:1,va:1000,fixed:true},{qty:1,va:4500,fixed:true}];s.hvac=[{mode:'noncoincident',cool:4000,heat:5000}];s.applianceMotor=3200;s.continuous=[{qty:1,va:7200,ev:true,factor:1}];const r=E.calculate(s);assert.equal(r.total,37250);assert.equal(r.amps,37250/240);assert.deepEqual(r.errors,[]);s.voltage=208;assert.equal(E.calculate(s).amps,37250/208);
 });
 test('cooking rows are separated into their applicable Table 220.55 groups',()=>{
  const s=base();s.cooking=[{label:'Range',qty:2,va:6500},{label:'Range 2',qty:1,va:3000},{label:'Wall Oven',qty:1,va:5000},{label:'Counter Mounted Oven',qty:2,va:3400},{label:'Cooktop',qty:1,va:5000}];

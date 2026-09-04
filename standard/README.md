@@ -21,7 +21,7 @@ Open `standard/index.html` through a static server. This is a separate NEC 2023 
 
 General demand uses the first 3,000 VA at 100%, the next 117,000 VA at 35%, and the remainder above 120,000 VA at 25%. The workbook instead used a 120,000-VA middle band, moving the upper breakpoint to 123,000 VA.
 
-Fixed appliances must be explicitly marked and meet the rating threshold. Quantity counts individual appliances. Below-threshold motors can qualify via the quarter-horsepower checkbox. Cooking, dryers, HVAC and EV are separated from that demand group.
+The Appliance Loads section is for fastened-in-place appliances. Its rows assume that scope without individual Fixed or horsepower questions, including when restoring older saved drafts. The existing 500-VA rating threshold still governs automatic qualification; a previously recorded quarter-horsepower qualification is retained. New below-threshold entries remain at 100% rather than guessing horsepower. Portable/nonqualifying loads can be entered under Other Noncontinuous Load. Quantity counts individual appliances.  Cooking, dryers, HVAC and EV are separated from that demand group.
 
 Cooking now follows Standard D row-by-row: each row groups appliances of the same rating. It automatically calculates the Table 220.55 demand for that quantity and rating, displays the selected method and demand on the row and report, then sums those row demands once. This preserves the workbook workflow; combining all cooking appliances into one overall demand group is not used. Columns A/B are applied where the row rating is within Note 3; Column C otherwise, with the over-12-kW adjustment. Ratings at or below 1.75 kW and above 27 kW stay at nameplate. All-nameplate load is an available conservative upper bound. No branch-circuit combination shortcut is used for separate ovens/cooktops.
 
@@ -40,3 +40,7 @@ HVAC alternatives are mutually exclusive only when the user selects that arrange
 ## Verification
 
 Run `node --test tests/standard-engine.test.cjs` from the repository root. Tests cover demand boundaries, mixed cooking loads, fixed-appliance eligibility, dryer thresholds, HVAC concurrency, governing motor cases, EV minimums, invalid entries, and a complete dwelling example.
+
+## Worksheet layout
+
+The load sections now form one continuous worksheet. General, cooking, dryer, appliance, motor, HVAC and result rows share column positions on desktop. Row descriptions and inline method notes stay on the sheet; quantities, ratings and outputs align. Mobile retains labeled inputs and responsive rows. Fixed and horsepower checkboxes are removed from the appliance form.

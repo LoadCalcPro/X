@@ -38,7 +38,10 @@ test('managed EV load uses the management system maximum total',()=>{
 test('incomplete and invalid inputs cannot silently produce a final result',()=>{
  const s=base();s.appliances=[{label:'Dishwasher',qty:1,va:''}];assert.match(E.calculate(s).errors.join(' '),/Complete quantity/);
  s.appliances=[{qty:1.5,va:1000}];assert.match(E.calculate(s).errors.join(' '),/whole number/);
- s.hvac=[{mode:'',cool:3500,coolMotor:'',heat:0}];assert.match(E.calculate(s).errors.join(' '),/arrangement/);assert.match(E.calculate(s).errors.join(' '),/compressor/);
+ s.hvac=[{mode:'',cool:3500,coolMotor:'',heat:0}];assert.match(E.calculate(s).errors.join(' '),/arrangement/);
+});
+test('HVAC calculates with optional motor fields left blank',()=>{
+ const s=base();s.hvac=[{mode:'noncoincident',cool:2500,coolMotor:'',heat:8000,heatMotor:''}];const r=E.calculate(s);assert.equal(r.hvac,8000);assert.equal(r.motorAdder,0);assert.deepEqual(r.errors,[]);
 });
 test('sample whole dwelling total and 208V conversion',()=>{
  const s=base();s.cooking=[{qty:1,va:12000}];s.dryers=[{qty:1,va:5000}];s.appliances=[{qty:1,va:1200,fixed:true},{qty:1,va:800,fixed:true},{qty:1,va:1000,fixed:true},{qty:1,va:4500,fixed:true}];s.hvac=[{mode:'noncoincident',cool:4000,coolMotor:3200,heat:5000,heatMotor:0}];s.continuous=[{qty:1,va:7200,ev:true,factor:1}];const r=E.calculate(s);assert.equal(r.total,36450);assert.equal(r.amps,151.875);assert.deepEqual(r.errors,[]);s.voltage=208;assert.equal(E.calculate(s).amps,36450/208);

@@ -4,7 +4,7 @@
 
 This is a checkpoint for continued development, not a completed release. The user requested saving this version to GitHub before further adjustments.
 
-Next work: restore the original workbook's separate neutral-load calculation and verify its X markers against the user's explanation that they identify loads eligible for neutral reduction. Verify the original automatic Table 220.55 selection against the new cooking calculation. Browser layout, controls and print verification remain outstanding. Do not treat the current omission of neutral calculations as the final agreed scope.
+Next work: restore the original workbook's separate neutral-load calculation and verify its X markers against the user's explanation that they identify loads eligible for neutral reduction. Browser layout, controls and print verification remain outstanding. Do not treat the current omission of neutral calculations as the final agreed scope.
 
 Open `standard/index.html` through a static server. This is a separate NEC 2023 single-dwelling calculator, based on the user's `Calculators 9-3-26.xlsx`, sheet `Standard D`, and the current production generator's visual conventions. Existing generator/AIC files are unchanged.
 
@@ -23,7 +23,7 @@ General demand uses the first 3,000 VA at 100%, the next 117,000 VA at 35%, and 
 
 Fixed appliances must be explicitly marked and meet the rating threshold. Quantity counts individual appliances. Below-threshold motors can qualify via the quarter-horsepower checkbox. Cooking, dryers, HVAC and EV are separated from that demand group.
 
-Cooking combines the quantities before applying Table 220.55. Columns A/B are applied by group where all table-eligible appliances are within Note 3; Column C otherwise, with the over-12-kW adjustment. Ratings at or below 1.75 kW and above 27 kW stay at nameplate. All-nameplate load is an available conservative upper bound. No branch-circuit combination shortcut is used for separate ovens/cooktops.
+Cooking now follows Standard D row-by-row: each row groups appliances of the same rating. It automatically calculates the Table 220.55 demand for that quantity and rating, displays the selected method and demand on the row and report, then sums those row demands once. This preserves the workbook workflow; combining all cooking appliances into one overall demand group is not used. Columns A/B are applied where the row rating is within Note 3; Column C otherwise, with the over-12-kW adjustment. Ratings at or below 1.75 kW and above 27 kW stay at nameplate. All-nameplate load is an available conservative upper bound. No branch-circuit combination shortcut is used for separate ovens/cooktops.
 
 Dryers have a per-unit 5,000-VA minimum before Table 220.54. EV charging has a per-unit 7,200-VA minimum before the 125% continuous factor.
 

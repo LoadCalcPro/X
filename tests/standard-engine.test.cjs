@@ -39,3 +39,10 @@ test('incomplete and invalid inputs cannot silently produce a final result',()=>
 test('sample whole dwelling total and 208V conversion',()=>{
  const s=base();s.cooking=[{qty:1,va:12000}];s.dryers=[{qty:1,va:5000}];s.appliances=[{qty:1,va:1200,fixed:true},{qty:1,va:800,fixed:true},{qty:1,va:1000,fixed:true},{qty:1,va:4500,fixed:true}];s.hvac=[{mode:'noncoincident',cool:4000,coolMotor:3200,heat:5000,heatMotor:0}];s.continuous=[{qty:1,va:7200,ev:true,factor:1.25}];const r=E.calculate(s);assert.equal(r.total,38250);assert.equal(r.amps,159.375);assert.deepEqual(r.errors,[]);s.voltage=208;assert.equal(E.calculate(s).amps,38250/208);
 });
+test('Standard D cooking rows automatically select their own table demand',()=>{
+ const s=base();s.cooking=[{label:'Range',qty:2,va:6500},{label:'Range 2',qty:1,va:3000},{label:'Wall Oven',qty:1,va:5000},{label:'Counter Mounted Oven',qty:2,va:3400},{label:'Cooktop',qty:1,va:5000}];
+ const r=E.calculate(s);assert.deepEqual(r.cooking.rows.map(x=>x.total),[8450,2400,4000,5100,4000]);assert.equal(r.cooking.total,23950);assert.equal(r.total,5625+23950);assert.equal(r.appliances,0);
+});
+test('Table 220.55 rating and quantity boundaries',()=>{
+ for(const [qty,rating,demand] of [[1,1750,1750],[1,1751,1400.8],[1,3500,2800],[1,8750,7000],[1,8751,8000],[1,12400,8000],[1,12600,8400],[1,27000,14000],[6,12000,21000],[16,5000,22400],[26,5000,31200],[41,12000,55750],[61,12000,70750]])assert.ok(Math.abs(E.cooking([{qty,va:rating}]).total-demand)<.001,`${qty} at ${rating}`);
+});

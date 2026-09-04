@@ -9,6 +9,7 @@ const A=[0,80,75,70,66,62,59,56,53,51,49,47,45,43,41,40,39,38,37,36,35,34,33,32,
 const B=[0,80,65,55,50,45,43,40,36,35,34,32,32,32,32,32,28,28,28,28,28,26,26,26,26,26];
 const C=[0,8,11,14,17,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
 function cooking(rows){
+ if(rows.some(r=>number(r.qty)>0&&!Number.isInteger(Number(r.qty))))return {total:0,method:'Enter a whole-number quantity'};
  const active=rows.filter(r=>load(r)>0), small=active.filter(r=>number(r.va)<=1750||number(r.va)>27000), eligible=active.filter(r=>number(r.va)>1750&&number(r.va)<=27000);
  const full=sum(small.map(load)), count=sum(eligible.map(r=>number(r.qty))), connected=sum(eligible.map(load));
  if(!count)return {total:full,method:'Nameplate at 100%'};
@@ -43,7 +44,11 @@ function calculate(s){
  const generalConnected=number(s.sqft)*3+number(s.small)*1500+number(s.laundry)*1500, demand=general(generalConnected);
  const apps=s.appliances||[], eligible=apps.filter(r=>r.fixed&&(number(r.va)>=500||r.quarterHP)&&load(r)>0), eligibleCount=sum(eligible.map(r=>number(r.qty))), eligibleVA=sum(eligible.map(load));
  const appliances=sum(apps.map(load))-eligibleVA+eligibleVA*(eligibleCount>=4?.75:1);
- const cook=cooking(s.cooking||[]), dryerCount=sum((s.dryers||[]).filter(r=>load(r)>0).map(r=>number(r.qty))), dryerConnected=sum((s.dryers||[]).filter(r=>load(r)>0).map(r=>number(r.qty)*Math.max(5000,number(r.va)))), dryers=dryerConnected*dryerFactor(dryerCount);
+ // Preserve Standard D: each entered row is a group of equally rated cooking appliances.
+ // Apply Table 220.55 to that row's quantity and rating, then sum its demand once.
+ const cookingRows=(s.cooking||[]).map(r=>({...cooking([r]),connected:load(r)}));
+ const cook={total:sum(cookingRows.map(r=>r.total)),method:'Total Cooking Demand — Table 220.55',rows:cookingRows};
+ const dryerCount=sum((s.dryers||[]).filter(r=>load(r)>0).map(r=>number(r.qty))), dryerConnected=sum((s.dryers||[]).filter(r=>load(r)>0).map(r=>number(r.qty)*Math.max(5000,number(r.va)))), dryers=dryerConnected*dryerFactor(dryerCount);
  const motorBase=sum((s.motors||[]).map(load));
  // Existing appliance motor component is entered separately to avoid adding its base twice.
  check(s.applianceMotor,'Largest appliance motor VA');

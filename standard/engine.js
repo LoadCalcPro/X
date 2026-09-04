@@ -44,10 +44,11 @@ function calculate(s){
  const generalConnected=number(s.sqft)*3+number(s.small)*1500+number(s.laundry)*1500, demand=general(generalConnected);
  const apps=s.appliances||[], eligible=apps.filter(r=>r.fixed&&(number(r.va)>=500||r.quarterHP)&&load(r)>0), eligibleCount=sum(eligible.map(r=>number(r.qty))), eligibleVA=sum(eligible.map(load));
  const appliances=sum(apps.map(load))-eligibleVA+eligibleVA*(eligibleCount>=4?.75:1);
- // Preserve Standard D: each entered row is a group of equally rated cooking appliances.
- // Apply Table 220.55 to that row's quantity and rating, then sum its demand once.
- const cookingRows=(s.cooking||[]).map(r=>({...cooking([r]),connected:load(r)}));
- const cook={total:sum(cookingRows.map(r=>r.total)),method:'Total Cooking Demand — Table 220.55',rows:cookingRows};
+ // Table 220.55 is applied once to all completed cooking-appliance entries.
+ // Row values remain connected loads for an auditable worksheet; the demand is a group result.
+ const cookingInputs=s.cooking||[], cookingRows=cookingInputs.map(r=>({connected:load(r)}));
+ const combinedCooking=cooking(cookingInputs);
+ const cook={...combinedCooking,method:combinedCooking.method,rows:cookingRows,connected:sum(cookingRows.map(r=>r.connected))};
  const dryerCount=sum((s.dryers||[]).filter(r=>load(r)>0).map(r=>number(r.qty))), dryerConnected=sum((s.dryers||[]).filter(r=>load(r)>0).map(r=>number(r.qty)*Math.max(5000,number(r.va)))), dryers=dryerConnected*dryerFactor(dryerCount);
  const motorBase=sum((s.motors||[]).map(load));
  // Existing appliance motor component is entered separately to avoid adding its base twice.

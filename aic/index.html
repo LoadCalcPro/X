@@ -68,7 +68,7 @@
     if(!d)return;
     let style=d.getElementById('aicPrintBrandingOverride');
     if(!style){style=d.createElement('style');style.id='aicPrintBrandingOverride';d.head.appendChild(style)}
-    const brandStyle='@media print{#printPages .aic-print-heading .print-brand{font-size:13px!important;letter-spacing:0!important}#printPages .aic-print-heading .print-brand-accent{margin-left:0!important}}';
+    const brandStyle='@media print{#printPages .aic-print-heading .print-brand{font-size:15.4px!important;letter-spacing:0!important}#printPages .aic-print-heading .print-brand-accent{margin-left:0!important}}';
     style.textContent=brandStyle+(printType.value==='calculation'
       ? '@media print{#printPages .aic-print-heading .print-brand{display:none!important}}'
       : '');

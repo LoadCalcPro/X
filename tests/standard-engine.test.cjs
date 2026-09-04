@@ -50,7 +50,11 @@ test('adding or removing a cooking row immediately changes the combined demand',
 });
 test('three 12 kW ranges plus two 3.3 kW ovens total 18,950 VA',()=>{
  const s=base();s.cooking=[{label:'Range',qty:3,va:12000},{label:'Wall Oven',qty:2,va:3300}];const r=E.calculate(s);
- assert.equal(r.cooking.connected,42600);assert.equal(r.cooking.total,18950);assert.equal(r.cooking.method,'Table 220.55 — Column C + Column A');
+ assert.equal(r.cooking.connected,42600);assert.equal(r.cooking.total,18950);assert.deepEqual(r.cooking.rows.map(x=>x.used),[14000,4950]);assert.equal(r.cooking.method,'Table 220.55 — Column C + Column A');
+});
+test('each cooking row reports connected VA and its allocated VA used',()=>{
+ const s=base();s.cooking=[{label:'Range',qty:2,va:12000},{label:'Wall Oven',qty:3,va:2500}];const r=E.calculate(s);
+ assert.deepEqual(r.cooking.rows,[{connected:24000,used:11000},{connected:7500,used:5250}]);assert.equal(r.cooking.total,16250);
 });
 test('Table 220.55 rating and quantity boundaries',()=>{
  for(const [qty,rating,demand] of [[1,1750,1750],[1,1751,1400.8],[1,3500,2800],[1,8750,7000],[1,8751,8000],[1,12400,8000],[1,12600,8400],[1,27000,14000],[6,12000,21000],[16,5000,22400],[26,5000,31200],[41,12000,55750],[61,12000,70750]])assert.ok(Math.abs(E.cooking([{qty,va:rating}]).total-demand)<.001,`${qty} at ${rating}`);

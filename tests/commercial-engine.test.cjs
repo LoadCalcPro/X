@@ -2,6 +2,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const E=require('../commercial/engine.js');
 const base=()=>({phase:3,voltage:208,occupancy:'retail',sqft:1000,actualLighting:'',hotelAllLighting:false,showWindowFt:'',trackFt:'',signQty:'',signRequired:false,receptacles:'',other:[],kitchen:[],hvacMode:'',cooling:'',heating:'',includedMotor:'',motors:[],continuous:[]});
+test('blank calculator is not blocked by validation',()=>{const s=base();s.occupancy='';s.sqft='';const r=E.calculate(s);assert.equal(r.touched,false);assert.deepEqual(r.errors,[]);});
 test('all Table 220.42(A) occupancy values are present',()=>{
  assert.equal(Object.keys(E.OCCUPANCIES).length,29);assert.equal(E.OCCUPANCIES.office.va,1.3);assert.equal(E.OCCUPANCIES.retail.va,1.9);assert.equal(E.OCCUPANCIES.warehouse.va,1.2);
 });

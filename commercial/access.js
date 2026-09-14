@@ -18,6 +18,22 @@
   }).catch(() => {});
 
   try {
+    const trialEmail = localStorage.getItem("loadcalcproTrialEmail") || "";
+    const trialCode = localStorage.getItem("loadcalcproTrialCode") || "";
+    if (trialEmail && trialCode) {
+      const trialResponse = await fetch("https://loadcalcpro-hcml-api.onrender.com/api/promo/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trialEmail, code: trialCode, calculator: "commercial" })
+      });
+      const trialResult = await trialResponse.json().catch(() => ({}));
+      if (trialResponse.ok && trialResult.active === true) {
+        gate.remove();
+        document.getElementById("accessStyles").remove();
+        return;
+      }
+    }
+
     const { data } = await client.auth.getSession();
     if (!data.session) {
       message.textContent = "Please sign in through the Member Dashboard to use the Commercial calculator.";

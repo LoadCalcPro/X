@@ -16,7 +16,7 @@ function renderHVAC(){ $('hvacRows').innerHTML=state.hvac.map((h,i)=>`<div class
 function renderEvManagedPanel(){const evs=state.continuous.filter(r=>r.ev),complete=evs.filter(r=>Number(r.qty)>0&&Number(r.va)>0),partial=evs.some(r=>(Number(r.qty)>0)!==(Number(r.va)>0)),enabled=complete.length>0&&!partial;if(!enabled)state.evManaged=false;$('evManaged').disabled=!enabled;$('evManaged').checked=state.evManaged;$('evManagedField').hidden=!state.evManaged;$('evManagedMax').disabled=!state.evManaged;$('evManagementHelp').textContent=enabled?'Check this box when the entered EV chargers share one energy-management system.':'Enter an EV charger quantity and nameplate VA to enable energy management.';}
 function render(){state.appliances.forEach(r=>{r.fixed=true;});scalars.forEach(k=>$(k).value=state[k]);groups.forEach(renderGroup);renderHVAC();renderEvManagedPanel();update(false);}
 function line(label,value,total=false){return `<div${total?' class="total"':''}><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`;}
-function display(value){return result.touched?va(value):'—';}
+function display(value){return result.touched&&Number(value)>0?va(value):'';}
 function update(save=true){
  result=StandardEngine.calculate(state);
  $('floorVA').textContent=Number(state.sqft)>0?va(Number(state.sqft)*3):'';$('smallVA').textContent=Number(state.small)>0?va(Number(state.small)*1500):'';$('laundryVA').textContent=Number(state.laundry)>0?va(Number(state.laundry)*1500):'';
@@ -25,7 +25,7 @@ function update(save=true){
  state.cooking.forEach((r,i)=>{const active=Number(r.qty)>0&&Number(r.va)>0;const used=document.querySelector(`[data-used-output="${i}"]`),column=document.querySelector(`[data-column-output="${i}"]`),percent=document.querySelector(`[data-percent-output="${i}"]`);if(used)used.textContent=active?fmt(result.cooking.rows[i].used):'';if(column)column.textContent=active?(result.cooking.rowColumn?.[i]||''):'';if(percent)percent.textContent=active?(result.cooking.rowPercent?.[i]||''):'';});
  $('cookingSummary').innerHTML=line('Connected Cooking Load',display(result.cooking.connected))+line(result.cooking.method,display(result.cooking.total),true);
  $('dryerSummary').innerHTML=line('Dryer Demand ('+fmt(StandardEngine.dryerFactor(result.dryerCount)*100)+'%)',display(result.dryers),true);
- $('applianceSummary').innerHTML=line('Qualifying Fixed Appliance Quantity',result.touched?fmt(result.eligibleCount):'—')+line('Appliance Demand ('+(result.eligibleCount>=4?'75% qualifying / 100% other':'100%')+')',display(result.appliances),true);
+ $('applianceSummary').innerHTML=line('Qualifying Fixed Appliance Quantity',result.eligibleCount>0?fmt(result.eligibleCount):'')+line('Appliance Demand ('+(result.eligibleCount>=4?'75% qualifying / 100% other':'100%')+')',display(result.appliances),true);
  state.hvac.forEach((h,i)=>['cool','heat'].forEach(k=>{const el=document.querySelector(`[data-hvac-output="${i}-${k}"]`);if(el)el.textContent=Number(h[k])>0?fmt(Number(h[k])):'';}));
  $('hvacSummary').innerHTML=result.hvacModes.map((h,i)=>line('System '+(i+1)+': '+h.label,display(h.base))).join('')+line('HVAC Load Before Motor Addition',display(result.hvac),true);
  $('motorSummary').innerHTML=line('Additional Motor Loads at 100%',display(result.motorBase))+line('Largest Applicable Motor',display(result.largestMotor))+line('Largest Motor Addition at 25%',display(result.motorAdder),true);
